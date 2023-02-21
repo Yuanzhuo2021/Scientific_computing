@@ -6,3 +6,5 @@ Created on Fri Jan 27 19:39:51 2023
 """
 
 print('hello')
+
+u1 = 1
