@@ -46,3 +46,21 @@ plt.yscale('log')
 plt.xscale('log')
 plt.xlabel('stepsize')
 plt.ylabel('Error')
+
+
+
+def solve_to(x0,t0,t1,deltat_max):
+    deltat = t1-t0
+    while deltat >= deltat_max:
+        deltat = deltat/10
+    return deltat
+     
+    num_steps = (t1-t0)/deltat
+    i =1
+    while i <= num_steps:
+        x1 = euler_step(t0,x0,deltat)
+        t0 = t0+deltat
+        i += 1
+    return x1
+
+solve_to(1,0,1,0.1)
