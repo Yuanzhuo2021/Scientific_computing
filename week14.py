@@ -66,3 +66,36 @@ def solve_to(x1,t1,t2,deltat_max):
 
 x2 = solve_to(1,0,1,0.01)
 print(x2)
+
+
+
+
+## use 4th Runge-Kutta method to solve ode
+
+def f(x,t):
+    return x
+    
+def RK4(x0,t0,t1,h):
+    
+    
+    num_steps = (t1-t0)/h
+    i = 1
+    while i <= num_steps:
+        k1 = f(x0,t0)
+        k2 = f(x0+h*k1*0.5,t0+h/2)
+        k3 = f(x0+h*k2*0.5,t0+h/2)
+        k4 = f(x0+h,t0+h*k3)
+        
+        #update x0 value
+        x0 = x0+h*(k1+2*k2+2*k3+k4)/6
+        #update t0 value
+        t0 = t0+h
+        i+=1
+        
+    return x0
+
+y = RK4(1,0,1,0.01)
+print(y)
+    
+    
+
