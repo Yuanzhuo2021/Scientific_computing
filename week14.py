@@ -9,6 +9,10 @@ This is a temporary script file.
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import time
+
+
+
 
 #define ode function
 def f(x,t):
@@ -46,6 +50,8 @@ def RK4(x0,t0,h):
 
 error_euler = []
 error_RK4 = []
+Time = []
+Time2 =[]
 
 #step size
 deltat = [1,0.5,0.2,0.1,0.05,0.02,0.01,0.005,0.002,0.001]
@@ -56,6 +62,7 @@ for ele in deltat:
     y0 =1
     num_steps = 1/ele
     i =1
+    
     while i <= num_steps:
         x0 = euler_step(x0,t0,ele)
         y0 =RK4(y0,t0,ele)
@@ -98,7 +105,14 @@ print(z)
 
 
 
-
-
+i = 1
+x0 = 1
+t0 = 0
+t = time.time()
+while i <= num_steps:
+    x0 = euler_step(x0,t0,ele)
+    t0 = t0+ele
+    i += 1
+Time = time.time()-t
     
 
