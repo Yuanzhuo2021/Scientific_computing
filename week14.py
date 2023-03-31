@@ -84,22 +84,44 @@ plt.legend(["Euler","RK4"], loc ="lower right")
 
 
 def solve_to(x1,t1,t2,deltat_max):
-    input('Please choose a method to solve ode problem: Type 1 for RK4; Type 2 for Euler method')
+    soln = []
     deltat = t2-t1
     while deltat >= deltat_max:
         deltat = deltat/10
      
     num_steps = (t2-t1)/deltat
     i =1
-    while i <= num_steps:
-        x1 = euler_step(x1,t1,deltat)
-        t1 = t1+deltat
-        i += 1
-    return x1
-   
+    
+    while True:
+        try:
+            method = input('Please choose a method to solve ode problem: Type RK4 or Euler ')
+            if method == 'RK4':
+                while i <= num_steps:
+                    x1 = euler_step(x1,t1,deltat)
+                    t1 = t1+deltat
+                    i += 1
+                break
+                    
+            elif method == 'Euler':
+                while i <= num_steps:
+                    x1 = RK4(x1,t1,deltat)
+                    t1 = t1+deltat
+                    i += 1
+                break
+                    
+            else:
+                print('Wrong input,please try again')
+        except:
+            continue
+                    
+        
+
+    soln.append(method)
+    soln.append(str(x1))
+    return soln
 
 z = solve_to(1,0,1,0.01)
-print(z)
+print('The x2 value using ' + z[0] +' method is '+ z[1])
 
 
 
@@ -112,5 +134,5 @@ while i <= num_steps:
     t0 = t0+ele
     i += 1
 Time = time.time()-t
+print(Time)
     
-
