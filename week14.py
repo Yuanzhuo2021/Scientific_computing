@@ -28,8 +28,6 @@ def euler_step(x0,t0,deltat):
 
 ##single step of 4th Runge-Kutta method
 
-
-    
 def RK4(x0,t0,h):
     k1 = f(x0,t0) 
     k2 = f(x0+h*k1*0.5,t0+h/2)
@@ -86,7 +84,7 @@ plt.legend(["Euler","RK4"], loc ="lower right")
 
 
 def solve_to(x1,t1,t2,deltat_max):
-    print('Pleaswchoose a method to solve ode problem:Type 1 for RK4; Type 2 for Euler method')
+    input('Please choose a method to solve ode problem: Type 1 for RK4; Type 2 for Euler method')
     deltat = t2-t1
     while deltat >= deltat_max:
         deltat = deltat/10
