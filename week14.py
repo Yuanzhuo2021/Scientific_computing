@@ -52,7 +52,7 @@ Time = []
 Time2 =[]
 
 #step size
-deltat = [1,0.5,0.2,0.1,0.05,0.02,0.01,0.005,0.002,0.001]
+deltat = [1,0.5,0.2,0.1,0.05,0.02,0.01,0.005,0.002,0.001,0.0005,0.0002,0.0001]
 
 for ele in deltat:
     t0 =0
@@ -73,6 +73,8 @@ for ele in deltat:
 
 print(x0)
 print(y0)
+
+#plot the errors against deltat of two methods
 plt.plot(deltat,error_euler,deltat,error_RK4)
 plt.yscale('log')
 plt.xscale('log')
@@ -92,6 +94,7 @@ def solve_to(x1,t1,t2,deltat_max):
     num_steps = (t2-t1)/deltat
     i =1
     
+    #ask user to choose a method to solve ode
     while True:
         try:
             method = input('Please choose a method to solve ode problem: Type RK4 or Euler ')
@@ -114,8 +117,6 @@ def solve_to(x1,t1,t2,deltat_max):
         except:
             continue
                     
-        
-
     soln.append(method)
     soln.append(str(x1))
     return soln
@@ -125,14 +126,36 @@ print('The x2 value using ' + z[0] +' method is '+ z[1])
 
 
 
+#output the errors,see the value of deltats give the same error
+
+print(error_euler)
+print(error_RK4)
+
+#print the error,  we see that the error is the same around 0.003 when deltat is 0.0002 for Euler method and 0.002 for RK4. Calculate the run time
+
+
 i = 1
 x0 = 1
 t0 = 0
-t = time.time()
-while i <= num_steps:
-    x0 = euler_step(x0,t0,ele)
-    t0 = t0+ele
+t1 = time.time()
+while i <= 1/0.0002:
+    x0 = euler_step(x0,t0,0.0002)
+    t0 = t0+0.0002
     i += 1
-Time = time.time()-t
-print(Time)
+Time1 = time.time()-t1
+print('The running time of Euler method solving ode with an error of 0.003 is ' + str(Time1))
+
+
+i = 1
+x0 = 1
+t0 = 0
+t2 = time.time()
+while i <= 1/0.002:
+    x0 = RK4(x0,t0,0.002)
+    t0 = t0+0.002
+    i += 1
+Time2 = time.time()-t2
+
+
+print('The running time of RK4 method solving ode with an error of 0.003 is ' + str(Time2))
     
