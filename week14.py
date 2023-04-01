@@ -159,3 +159,53 @@ Time2 = time.time()-t2
 
 print('The running time of RK4 method solving ode with an error of 0.003 is ' + str(Time2))
     
+
+
+
+
+
+#define ode function
+def f1(x,t):
+    return -t
+
+def f2(y,x):
+    return x
+
+
+# single step of euler's method 
+def second_order_euler1(x0,t0,deltat):
+    x1 = x0+deltat*f1(x0,t0)
+    return x1
+    
+def second_order_euler2(y0,x0,deltat):  
+    y1 = y0+deltat*f2(y0,x0)
+    return y1
+
+
+##single step of 4th Runge-Kutta method
+
+def RK4(x0,t0,h):
+    k1 = f(x0,t0) 
+    k2 = f(x0+h*k1*0.5,t0+h/2)
+    k3 = f(x0+h*k2*0.5,t0+h/2)
+    k4 = f(x0+h,t0+h*k3)
+        
+    #update x0 value
+    x1 = x0+h*(k1+2*k2+2*k3+k4)/6
+    return x1
+
+
+t0 =0
+x0 =1
+y0 =1
+num_steps = 1/0.0001
+i =1
+while i <= num_steps:
+    x0 = second_order_euler1(x0,t0,0.0001)
+    y0 = second_order_euler2(y0,x0,0.0001)
+    t0 = t0+0.0001
+    i += 1
+print(y0)        
+
+z = second_order_euler(1,1,0,0.0001)
+print(z)
