@@ -164,11 +164,11 @@ print('The running time of RK4 method solving ode with an error of 0.003 is ' + 
 
 
 
-#define ode function  dy/dt = -x
+#define ode function  dy/dx = -x
 def f1(y,x):
     return -x
 
-#define ode function dx/dt = y
+#define ode function dx/dy = y
 def f2(x,y):
     return y
 
@@ -208,3 +208,25 @@ plt.xlabel('t')
 plt.legend()
 plt.title('solution to second order ode using different size of timestep')
 plt.show()
+
+
+
+
+
+def RK4(y,x,h):
+    k1 = f1(y,x) 
+    K1 = f2(x,y)
+    k2 = f1(y+h*K1*0.5,x+h/2)
+    K2 = f2(x+h*k1*0.5,y+h/2)
+    k3 = f1(y+h*K2*0.5,x+h/2)
+    K3 = f2(x+h*k2*0.5,y+h/2)
+    k4 = f1(y+h,x+h*K3)
+    K4 = f2(x+h,y+h*k3)
+  
+    
+    #update x0 value
+    x1 = x +h*(k1+2*k2+2*k3+k4)/6
+    y1 = y +h*(K1+2*K2+2*K3+K4)/6
+    return x1,y1
+
+
