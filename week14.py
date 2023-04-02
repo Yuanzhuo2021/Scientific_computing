@@ -179,41 +179,7 @@ def second_order_euler(y0,x0,deltat):
     x1 = x0+deltat*f2(x0,y1)
     return y1,x1
 
-
-
-def solve_ode(deltat):
-    
-    x0 = 1 
-    y0 = 1
-    i = 1
-    solution = [x0]
-    t = np.linspace(0, 1, int(1/deltat) + 1)
-    num_steps = 1/deltat
-    
-    while i <= num_steps:
-        y0,x0 = second_order_euler(y0,x0,deltat)
-        i+=1
-        solution.append(x0)
-    return t,solution
-
-t1,soln1 = solve_ode(0.1)
-t2,soln2 = solve_ode(0.001)
-
-
-plt.plot(t1, soln1, 'b',label='deltat=0.1')
-plt.plot(t2, soln2, 'go-',label='deltat=0.001')
-plt.plot(t2,np.sin(t2)+np.cos(t2),'r',label='real')
-plt.ylabel('x')
-plt.xlabel('t')
-plt.legend()
-plt.title('solution to second order ode using different size of timestep')
-plt.show()
-
-
-
-
-
-def RK4(y,x,h):
+def second_order_RK4(y,x,h):
     k1 = f1(y,x) 
     K1 = f2(x,y)
     k2 = f1(y+h*K1*0.5,x+h/2)
@@ -225,8 +191,42 @@ def RK4(y,x,h):
   
     
     #update x0 value
-    x1 = x +h*(k1+2*k2+2*k3+k4)/6
-    y1 = y +h*(K1+2*K2+2*K3+K4)/6
-    return x1,y1
+    y1 = y +h*(k1+2*k2+2*k3+k4)/6
+    x1 = x +h*(K1+2*K2+2*K3+K4)/6
+    return y1,x1
+
+
+
+def solve_ode(deltat):
+    
+    x0,y0 = 1,1
+    X0,Y0 = 1,1
+    solution_euler = [x0]
+    solution_RK4 = [X0]
+    t = np.linspace(0, 1, int(1/deltat) + 1)
+    
+    for i in range(int(1/deltat)):
+        y0,x0 = second_order_euler(y0,x0,deltat)
+        Y0,X0 = second_order_RK4(Y0,X0,deltat)
+        solution_euler.append(x0)
+        solution_RK4.append(X0)
+    return t,solution_euler,solution_RK4
+
+t1,soln1_euler,soln1_RK4 = solve_ode(0.1)
+t2,soln2_euler,soln2_RK4 = solve_ode(0.01)
+
+plt.plot(t1, soln1_euler, 'b',label='Euler(deltat=0.1)')
+plt.plot(t1, soln1_RK4, 'k',label='RK4(deltat=0.1)')
+plt.plot(t2, soln2_euler, 'g-',label='Euler(deltat=0.01)')
+plt.plot(t2, soln2_RK4, 'y-',label='RK4(deltat=0.01)')
+plt.plot(t2,np.sin(t2)+np.cos(t2),'r',label='real solution')
+plt.ylabel('x')
+plt.xlabel('t')
+plt.legend()
+plt.title('solution to second order ode using different size of timestep')
+plt.show()
+
+
+
 
 
