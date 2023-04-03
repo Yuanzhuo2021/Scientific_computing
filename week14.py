@@ -55,9 +55,7 @@ Time2 =[]
 deltat = [1,0.5,0.2,0.1,0.05,0.02,0.01,0.005,0.002,0.001,0.0005,0.0002,0.0001]
 
 for ele in deltat:
-    t0 =0
-    x0 =1
-    y0 =1
+    t0,x0,y0 =0,1,1
     num_steps = 1/ele
     i =1
     
@@ -228,5 +226,24 @@ plt.show()
 
 
 
+
+
+#implement midpoint method to solve ode
+
+
+def midpoint(x0,t0,deltat):
+    t1 = t0+0.5*deltat
+    x1 = x0 + 0.5*deltat*f(x0,t0)
+    k = f(x1,t1)
+    t2 = t0 + deltat
+    x2 = x0 + deltat*k
+    return x2,t2
+
+deltat = 0.001
+x0,t0  = 1,0
+for i in range (int(1/deltat)):
+    x0,t0 = midpoint(x0,t0,deltat)
+
+print(x0)
 
 
