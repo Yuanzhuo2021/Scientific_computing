@@ -6,6 +6,7 @@ Created on Mon Apr  3 18:39:32 2023
 """
 import numpy as np
 import matplotlib.pyplot as plt
+from scripy.optimize import root
 
 
 def predator_prey(x0,y0,a,b,d,deltat):
@@ -54,3 +55,30 @@ plt.plot(soln4_x,soln4_y,label = 'b = 0.4')
 plt.xlabel('x')
 plt.ylabel('y')
 plt.legend()
+
+
+
+
+def predator_prey2(x0,y0,a,b,d,deltat):
+    dxdt = x0*(1-x0)-(a*x0*y0)/(d+x0)
+    dydt = b*y0*(1-y0/x0)
+    return [dxdt,dydt]
+
+#x nullcline
+xval = np.linspace(0.01,200,201)
+yval = []
+for (i,V) in enumerate(xval):
+    result = root(lambda Y:predator_prey2(V,Y,1,0.5,0.1,0.01)[1],0)
+    yval.append(result.x)
+plt.plot(xval,yval)
+print(yval)
+
+#x nullcline
+yval = np.linspace(0.01,200,201)
+xval = []
+for (i,V) in enumerate(yval):
+    result = root(lambda X:predator_prey2(X,V,1,0.5,0.1,0.01)[0],0)
+    xval.append(result.x)
+plt.plot(xval,yval)
+
+
