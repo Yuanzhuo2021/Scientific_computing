@@ -59,26 +59,48 @@ plt.legend()
 
 
 
+#dydt = 0
+
 def predator_prey2(x0,y0,a,b,d,deltat):
     dxdt = x0*(1-x0)-(a*x0*y0)/(d+x0)
     dydt = b*y0*(1-y0/x0)
     return [dxdt,dydt]
 
 #x nullcline
-xval = np.linspace(0.01,200,201)
-yval = []
+xval = np.linspace(0.01,1,201)
+yval = np.zeros(np.size(xval))
 for (i,V) in enumerate(xval):
-    result = root(lambda Y:predator_prey2(V,Y,1,0.5,0.1,0.01)[1],0)
-    yval.append(result.x)
+    result = root(lambda Y:predator_prey2(V,Y,1,0.1,0.1,0.01)[0],1)
+    if result.success:
+        yval[i] = result.x
+    else:
+        yval[i] = nan
 plt.plot(xval,yval)
 print(yval)
 
 #x nullcline
-yval = np.linspace(0.01,200,201)
-xval = []
-for (i,V) in enumerate(yval):
-    result = root(lambda X:predator_prey2(X,V,1,0.5,0.1,0.01)[0],0)
-    xval.append(result.x)
+#yval = np.linspace(0,1,201)
+#xval = []
+#for V in yval:
+   # result = fsolve(lambda X:predator_prey2(X,V,1,0.1,0.1,0.01)[0],1)
+    #xval.append(result)
+#plt.plot(xval,yval)
+
+xval = np.linspace(0.01,1,201)
+yval = np.zeros(np.size(xval))
+for (i,V) in enumerate(xval):
+    result = root(lambda Y:predator_prey2(V,Y,1,0.1,0.1,0.01)[1],1)
+    if result.success:
+        yval[i] = result.x
+    else:
+        yval[i] = nan
 plt.plot(xval,yval)
+print(yval)
+#def period(t):
+
+   # return soln1_x[t] - soln1_x[0]
+
+#T = fsolve(period,1)[0]
+#print(T)
 
 
