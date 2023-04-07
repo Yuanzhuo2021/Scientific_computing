@@ -6,9 +6,10 @@ Created on Mon Apr  3 18:39:32 2023
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from scripy.optimize import root
+from scipy.optimize import root
+from scipy.optimize import fsolve
 
-
+#define the predator_prey function as a system of odes
 def predator_prey(x0,y0,a,b,d,deltat):
     dxdt = x0*(1-x0)-(a*x0*y0)/(d+x0)
     dydt = b*y0*(1-y0/x0)
@@ -17,6 +18,8 @@ def predator_prey(x0,y0,a,b,d,deltat):
     return x1,y1
 
 
+#solve the x and y corresponding to number of preys and predators
+#plot the gragh of their population against time with different value of b
 def predator_prey_plot(b):
         
     a = 1
@@ -59,48 +62,41 @@ plt.legend()
 
 
 
-#dydt = 0
 
 def predator_prey2(x0,y0,a,b,d,deltat):
     dxdt = x0*(1-x0)-(a*x0*y0)/(d+x0)
     dydt = b*y0*(1-y0/x0)
     return [dxdt,dydt]
 
-#x nullcline
+#x nullcline : dx/dt = 0 reference(bb)
 xval = np.linspace(0.01,1,201)
 yval = np.zeros(np.size(xval))
 for (i,V) in enumerate(xval):
-    result = root(lambda Y:predator_prey2(V,Y,1,0.1,0.1,0.01)[0],1)
-    if result.success:
-        yval[i] = result.x
-    else:
-        yval[i] = nan
+    result = fsolve(lambda Y:predator_prey2(V,Y,1,0.1,0.1,0.01)[0],1)
+    #if result.success:
+    yval[i] = result
+    #else:
+        #yval[i] = nan
+plt.figure()
 plt.plot(xval,yval)
 print(yval)
 
-#x nullcline
-#yval = np.linspace(0,1,201)
-#xval = []
-#for V in yval:
-   # result = fsolve(lambda X:predator_prey2(X,V,1,0.1,0.1,0.01)[0],1)
-    #xval.append(result)
-#plt.plot(xval,yval)
 
+#y nullcline  dy/dt = 0
 xval = np.linspace(0.01,1,201)
 yval = np.zeros(np.size(xval))
 for (i,V) in enumerate(xval):
-    result = root(lambda Y:predator_prey2(V,Y,1,0.1,0.1,0.01)[1],1)
-    if result.success:
-        yval[i] = result.x
-    else:
-        yval[i] = nan
+    result = fsolve(lambda Y:predator_prey2(V,Y,1,0.1,0.1,0.01)[1],1)
+    #if result.success:
+    yval[i] = result
+    #else:
+        #yval[i] = nan
 plt.plot(xval,yval)
 print(yval)
-#def period(t):
 
-   # return soln1_x[t] - soln1_x[0]
 
-#T = fsolve(period,1)[0]
-#print(T)
+#find the equilibrium point where dy/dt = dx/dt = 0
+x,y = fsolve(lambda u :predator_prey2(u[0],u[1],1,0.1,0.1,0.01),(0.3,0.3))
+print('The equilibrium point is at '+ '('+str(x)+','+ str(y)+')')
 
 
