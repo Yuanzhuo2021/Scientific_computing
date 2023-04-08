@@ -100,6 +100,8 @@ x,y = fsolve(lambda u :predator_prey2(u[0],u[1],1,0.1,0.1,0.01),(0.3,0.3))
 print('The equilibrium point is at '+ '('+str(x)+','+ str(y)+')')
 
 
+
+
 def numerical_shooting(x0,y0,T):
     a = 1
     b = 0.1
@@ -112,7 +114,12 @@ def numerical_shooting(x0,y0,T):
         p,q=predator_prey(p,q,a,b,d,deltat)
     return [x0-p,y0-q,dxdt]
     
+def solve(x,y,T):
     
+    x,y,z = fsolve(lambda u:numerical_shooting(u[0],u[1],u[2]),(x,y,T))
+    return np.array([x,y,z])
+
+solve(0.3,0.3,10)
 z = fsolve(lambda u:numerical_shooting(u[0],u[1],u[2]),(0.1,0.1,8))
 
 print(z)
