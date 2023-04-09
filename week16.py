@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 def shooting_ode_solver(func,u0,t_span,method,guess):
     """
-    This function uses numerical shooting method and root finding method to solve ordinary differential equations. 
+    This function uses numerical shooting method, root finding method and numerical integrators to solve ordinary differential equations. 
     It includes finding the limit cycles and phase condition, plotting phase portraits and variables agaisnt time. 
     
     Parameters
@@ -20,19 +20,22 @@ def shooting_ode_solver(func,u0,t_span,method,guess):
         
         Example: A predator_prey ode function can be written as below:
         
-        def predator_prey(u1,u2,a,b,d):
-            du1dt = u1*(1-u1)-(a*u1*u2)/(d+u1)
-            du2dt = b*u2*(1-u2/u1)
+        def predator_prey(u,a,b,d):
+            du1dt = u[0]*(1-u[1])-(a*u[0]*u[1])/(d+u[0])
+            du2dt = b*u[1]*(1-u[1]/u[0])
             return np.array([du1dt,du2dt])
             
-        where u1,u2 are number of preys and predators(variables we want to solve), a, b, d are parameters in the model.The output is a numpy
+        where u is the state vector : u = [u1,u2]. u1,u2 are number of preys and predators(variables we want to solve), a, b, d are parameters in the model.The output is a numpy
         array of du1/dt and du2/dt, which will be used to in our shooting function later.
         
         
         parameters that are needed in the 'func',you need to specify the initial values.
         Example: for predator prey ode function, func = predator_prey(u1,u2,a,b,d), u1,u2,a,b,d you need to give them values
+        
+    u0:
+        Initial values for variables in a numpy array.E.g. u1,u2,u3.. 
          
-    t : 
+    t_span : 
         Input a time span t_span, which is a integer.The solution will get after t_span 
         
              
@@ -56,17 +59,18 @@ def shooting_ode_solver(func,u0,t_span,method,guess):
      """
     # Here is the code that does the shooting
     
-    
-    
+    sol = np.zeros(size(u0))
     # single step of euler's method 
-    def euler_step(x0,t0,deltat):
-        x1 = x0+deltat*func
-        return x1
+    def euler_step(u0,0.001):
+        for k in range(size(u0)):
+            sol[k] = u0[k]+0.001*func[k]
+        return sol
 
 
     ##single step of 4th Runge-Kutta method
-
-    def RK4(x0,t0,h):
+    
+    
+    def RK4(x0,t_span[0],h):
         k1 = f(x0,t0) 
         k2 = f(x0+h*k1*0.5,t0+h/2)
         k3 = f(x0+h*k2*0.5,t0+h/2)
@@ -97,12 +101,5 @@ def shooting_ode_solver(func,u0,t_span,method,guess):
 
     
     
-        
-        
-        
-         
-    
-        
-        
         
         
