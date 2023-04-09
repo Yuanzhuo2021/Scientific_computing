@@ -4,10 +4,7 @@ Created on Sat Apr  8 23:53:31 2023
 
 @author: YHU
 """
-import numpy as np
-import matplotlib.pyplot as plt
-
-def shooting_ode_solver(func,u0,t_span,method,guess):
+def shooting_ode_solver(func,u0,t0,tn,method,guess):
     """
     This function uses numerical shooting method, root finding method and numerical integrators to solve ordinary differential equations. 
     It includes finding the limit cycles and phase condition, plotting phase portraits and variables agaisnt time. 
@@ -20,13 +17,16 @@ def shooting_ode_solver(func,u0,t_span,method,guess):
         
         Example: A predator_prey ode function can be written as below:
         
-        def predator_prey(u,a,b,d):
+        def predator_prey(u,t):
+            a = a
+            b = b
+            d = d
             du1dt = u[0]*(1-u[1])-(a*u[0]*u[1])/(d+u[0])
             du2dt = b*u[1]*(1-u[1]/u[0])
             return np.array([du1dt,du2dt])
             
-        where u is the state vector : u = [u1,u2]. u1,u2 are number of preys and predators(variables we want to solve), a, b, d are parameters in the model.The output is a numpy
-        array of du1/dt and du2/dt, which will be used to in our shooting function later.
+        where u is the state vector : u = [u1,u2]. u1,u2 are number of preys and predators(variables we want to solve).t is initial time when u1,u2 
+        get initial values. a, b, d are parameters in the model.The output is a numpy array of du1/dt and du2/dt, which will be used to in our shooting function later.
         
         
         parameters that are needed in the 'func',you need to specify the initial values.
@@ -59,46 +59,43 @@ def shooting_ode_solver(func,u0,t_span,method,guess):
      """
     # Here is the code that does the shooting
     
-    sol = np.zeros(size(u0))
     # single step of euler's method 
-    def euler_step(u0,0.001):
-        for k in range(size(u0)):
-            sol[k] = u0[k]+0.001*func[k]
-        return sol
+    def euler_step(u0,t0,deltat):
+        
+        u1 = u0+deltat*func(u0,t0)
+        t1 = t0 + deltat
+        return u1,t1
 
 
     ##single step of 4th Runge-Kutta method
+    #ref: https://math.stackexchange.com/questions/721076/help-with-using-the-runge-kutta-4th-order-method-on-a-system-of-2-first-order-od
     
-    
-    def RK4(x0,t_span[0],h):
-        k1 = f(x0,t0) 
-        k2 = f(x0+h*k1*0.5,t0+h/2)
-        k3 = f(x0+h*k2*0.5,t0+h/2)
-        k4 = f(x0+h,t0+h*k3)
+    def RK4(u0,t0,h):
+        k1 = func(u0,t0) 
+        k2 = func(u0+h*k1*0.5,t0+h/2)
+        k3 = func(u0+h*k2*0.5,t0+h/2)
+        k4 = func(u0+h*k3,t0+h)
         
         #update x0 value
-        x1 = x0+h*(k1+2*k2+2*k3+k4)/6
-        return x1
+        u1 = u0+h*(k1+2*k2+2*k3+k4)/6
+        t1 = t0 + h
+        return u1,t1
     
     
-    if method == 'Euler':
-        while i <= num_steps:
-            x1 = euler_step(x1,t1,deltat)
-            t1 = t1+deltat
-            i += 1
-        break
-                    
+    u0 = u0
+    deltat = 0.001
+    h = 0.001
+    
+    if method == 'euler':
+        for i in range(int((tn-t0)/deltat)):
+            u0,t0 = euler_step(u0,t0,deltat)
+    
     elif method == 'RK4':
-        while i <= num_steps:
-            x1 = RK4(x1,t1,deltat)
-            t1 = t1+deltat
-            i += 1
-        break
-                    
-    else:
-        print('Wrong input,please try again')
-
-
+        for i in range(int((tn-t0)/h)):
+            u0,t0 = RK4(u0,t0,h)
+            
+    
+    return u0
     
     
         
