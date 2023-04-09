@@ -32,7 +32,7 @@ def RK4(x0,t0,h):
     k1 = f(x0,t0) 
     k2 = f(x0+h*k1*0.5,t0+h/2)
     k3 = f(x0+h*k2*0.5,t0+h/2)
-    k4 = f(x0+h,t0+h*k3)
+    k4 = f(x0+h*k3,t0+h)
         
     #update x0 value
     x1 = x0+h*(k1+2*k2+2*k3+k4)/6
@@ -119,7 +119,7 @@ def solve_to(x1,t1,t2,deltat_max):
     soln.append(str(x1))
     return soln
 
-z = solve_to(1,0,1,0.01)
+z = solve_to(1,0,1,0.001)
 print('The x2 value using ' + z[0] +' method is '+ z[1])
 
 
