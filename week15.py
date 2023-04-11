@@ -50,7 +50,9 @@ soln3_x,soln3_y = predator_prey_plot(0.3)
 soln2_x,soln2_y = predator_prey_plot(0.2)
 soln1_x,soln1_y = predator_prey_plot(0.1)
 
-# use different values of b, by look at the result, we see that 
+# use different values of b, by looking at the plots, we see that for long-time limit
+# when b <0.26, (b= 0.1/b=0.2), the x and y are oscillating and have limit cylces
+# when b> 0.26 (b =0.3/b=0.4), the x and y converge together to a equilibrium point 
 plt.plot(soln1_x,soln1_y,label = 'b = 0.1')
 plt.plot(soln2_x,soln2_y,label = 'b = 0.2')
 plt.plot(soln3_x,soln3_y,label = 'b = 0.3')
