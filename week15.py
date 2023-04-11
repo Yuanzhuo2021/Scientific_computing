@@ -44,13 +44,13 @@ def predator_prey_plot(b):
     plt.show()
     return soln_x, soln_y
 
-
+#solutions by using different b
 soln4_x,soln4_y = predator_prey_plot(0.4)
 soln3_x,soln3_y = predator_prey_plot(0.3)
 soln2_x,soln2_y = predator_prey_plot(0.2)
 soln1_x,soln1_y = predator_prey_plot(0.1)
 
-
+# use different values of b, by look at the result, we see that 
 plt.plot(soln1_x,soln1_y,label = 'b = 0.1')
 plt.plot(soln2_x,soln2_y,label = 'b = 0.2')
 plt.plot(soln3_x,soln3_y,label = 'b = 0.3')
@@ -62,7 +62,7 @@ plt.legend()
 
 
 
-
+# define the predator_prey ode 
 def predator_prey2(x0,y0,a,b,d,deltat):
     dxdt = x0*(1-x0)-(a*x0*y0)/(d+x0)
     dydt = b*y0*(1-y0/x0)
@@ -101,7 +101,12 @@ print('The equilibrium point is at '+ '('+str(x)+','+ str(y)+')')
 
 
 
-
+#numerical shooting method with fsolve function. this function is specified to solve predator ode.
+# to solve higher dimension system odes, we will improve it later. 
+#x0,y0 is the initial guess of solution that will give limit cycles. T is the guessed period
+# To have a better guess, we look at x,y againt t plots, the occilation of limit cycles starts at
+#around x = 0.3 and y =0.3 with a period around 20
+ 
 def numerical_shooting(x0,y0,T):
     a = 1
     b = 0.1
@@ -113,9 +118,10 @@ def numerical_shooting(x0,y0,T):
     for i in range(int(T/deltat)):
         p,q=predator_prey(p,q,a,b,d,deltat)
     return [x0-p,y0-q,dxdt]
-    
+
+# use fsolve in scripy, the pros are this is an existing function that is well-built to find roots,
+# the cons are we need give initial guess and it may not converge and it may give reuslt that is wrong.like T less than 0   
 def solve(x,y,T):
-    
     x,y,z = fsolve(lambda u:numerical_shooting(u[0],u[1],u[2]),(x,y,T))
     return np.array([x,y,z])
 

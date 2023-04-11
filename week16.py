@@ -4,6 +4,9 @@ Created on Sat Apr  8 23:53:31 2023
 
 @author: YHU
 """
+import numpy as np
+import matplotlib.pyplot as plt
+
 def shooting_ode_solver(func,u0,t0,tn,method,guess):
     """
     This function uses numerical shooting method, root finding method and numerical integrators to solve ordinary differential equations. 
@@ -59,9 +62,11 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
      """
     # Here is the code that does the shooting
     
-    # single step of euler's method 
+    # single step of euler's method work for all ode 
+    # u0 is a numpy array , the state initial values of variables in ode
+    # t0 is the initial time
+    # deltat is the stepsize
     def euler_step(u0,t0,deltat):
-        
         u1 = u0+deltat*func(u0,t0)
         t1 = t0 + deltat
         return u1,t1
@@ -70,21 +75,20 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
     ##single step of 4th Runge-Kutta method
     #ref: https://math.stackexchange.com/questions/721076/help-with-using-the-runge-kutta-4th-order-method-on-a-system-of-2-first-order-od
     
-    def RK4(u0,t0,h):
+    def RK4(u0,t0,deltat):
         k1 = func(u0,t0) 
-        k2 = func(u0+h*k1*0.5,t0+h/2)
-        k3 = func(u0+h*k2*0.5,t0+h/2)
-        k4 = func(u0+h*k3,t0+h)
+        k2 = func(u0+h*k1*0.5,t0+deltat/2)
+        k3 = func(u0+h*k2*0.5,t0+deltat/2)
+        k4 = func(u0+h*k3,t0+deltat)
         
         #update x0 value
-        u1 = u0+h*(k1+2*k2+2*k3+k4)/6
-        t1 = t0 + h
+        u1 = u0+deltat*(k1+2*k2+2*k3+k4)/6
+        t1 = t0 + deltat
         return u1,t1
     
     
     u0 = u0
-    deltat = 0.001
-    h = 0.001
+    deltat = 0.001  # set deltat equals 0.001, which will give error of RK4 and euler less than 1e-4
     
     if method == 'euler':
         for i in range(int((tn-t0)/deltat)):
@@ -96,7 +100,19 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
             
     
     return u0
-    
-    
-        
-        
+
+
+# use d^2x/dt^2 = -x ode to test if the function we built get the correct result
+
+def func(u,t):
+    x,y = u
+    dxdt = y
+    dydt = -x
+    return np.array([dxdt,dydt])
+
+z1 = shooting_ode_solver(func,(1,1),0,1,'euler',(1,2))
+z2 = shooting_ode_solver(func,(1,1),0,1,'RK4',(1,2))
+
+print(z1[0])
+print(z2[0])
+# the answer is close to the correct value of solution x at t =1
