@@ -77,15 +77,22 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
     
     def RK4(u0,t0,deltat):
         k1 = func(u0,t0) 
-        k2 = func(u0+h*k1*0.5,t0+deltat/2)
-        k3 = func(u0+h*k2*0.5,t0+deltat/2)
-        k4 = func(u0+h*k3,t0+deltat)
-        
-        #update x0 value
+        k2 = func(u0+deltat*k1*0.5,t0+deltat/2)
+        k3 = func(u0+deltat*k2*0.5,t0+deltat/2)
+        k4 = func(u0+deltat*k3,t0+deltat)
+        #update u0 value
         u1 = u0+deltat*(k1+2*k2+2*k3+k4)/6
         t1 = t0 + deltat
         return u1,t1
     
+    # implement midpoint method
+    def midpoint(u0,t0,deltat):
+        t1 = t0+0.5*deltat
+        u1 = u0 + 0.5*deltat*func(u0,t0)
+        k = func(u1,t1)
+        t2 = t0 + deltat
+        u2 = u0 + deltat*k
+        return u2,t2
     
     u0 = u0
     deltat = 0.001  # set deltat equals 0.001, which will give error of RK4 and euler less than 1e-4
@@ -95,10 +102,14 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
             u0,t0 = euler_step(u0,t0,deltat)
     
     elif method == 'RK4':
-        for i in range(int((tn-t0)/h)):
-            u0,t0 = RK4(u0,t0,h)
+        for i in range(int((tn-t0)/deltat)):
+            u0,t0 = RK4(u0,t0,deltat)
             
-    
+    elif method == 'midpoint':
+        for i in range(int((tn-t0)/deltat)):
+            u0,t0 = midpoint(u0,t0,deltat)
+                
+            
     return u0
 
 
@@ -112,7 +123,30 @@ def func(u,t):
 
 z1 = shooting_ode_solver(func,(1,1),0,1,'euler',(1,2))
 z2 = shooting_ode_solver(func,(1,1),0,1,'RK4',(1,2))
+z3 = shooting_ode_solver(func,(1,1),0,1,'midpoint',(1,2))
 
-print(z1[0])
-print(z2[0])
+print(z1)
+print(z2)
+print(z3)
 # the answer is close to the correct value of solution x at t =1
+
+
+##ODE for the Hopf bifurcation normal form
+def Hopf_bifurcation(u,t0):
+    u1,u2 = u
+    sigma = -1
+    beta = 1
+    du1dt = beta*u1-u2+sigma*u1*(u1**2+u2**2)
+    du2dt = u1+beta*u2+sigma*u2*(u1**2+u2**2)
+    return np.array([du1dt,du2dt])
+
+z1 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'euler',(1,2))
+z2 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'RK4',(1,2))
+z3 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'midpoint',(1,2))
+
+print(z1)
+print(z2)
+print(z3)
+
+
+
