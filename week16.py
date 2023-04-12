@@ -94,6 +94,26 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
         u2 = u0 + deltat*k
         return u2,t2
     
+    
+    def numerical_shooting(guess):
+        u_0 = guess[:-1]
+        T0 = guess[-1] 
+        t_0 = t0
+        dxdt = func(u_0,t_0)
+        for i in range(int(T0/deltat)):
+            u_0,t_0=euler_step(u_0,t_0,deltat)
+        return np.array([guess[:-1]-u_0,dxdt])
+
+    # use fsolve in scripy, the pros are this is an existing function that is well-built to find roots,
+    # the cons are we need give initial guess and it may not converge and it may give reuslt that is wrong.like T less than 0   
+    def solve(guess):
+        x = fsolve(numerical_shooting,guess)
+        #if result.success:
+            #print('success')
+        #else:
+            #print('failed to converge')
+        #return result.x
+    
     u0 = u0
     deltat = 1e-6  # set deltat equals 1e-6, which will give very high accuracy of RK4 and euler 
     
@@ -111,6 +131,9 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
                 
             
     return u0
+
+
+
 
 
 # use d^2x/dt^2 = -x ode to test if the function we built get the correct result
@@ -167,3 +190,6 @@ unittest.main(argv=[''],verbosity=2, exit=False)
 #if __name__ == '__main__':
     #unittest.main()
 
+
+
+   
