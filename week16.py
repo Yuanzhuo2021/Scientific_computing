@@ -6,6 +6,8 @@ Created on Sat Apr  8 23:53:31 2023
 """
 import numpy as np
 import matplotlib.pyplot as plt
+import math
+import unittest
 
 def shooting_ode_solver(func,u0,t0,tn,method,guess):
     """
@@ -63,9 +65,7 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
     # Here is the code that does the shooting
     
     # single step of euler's method work for all ode 
-    # u0 is a numpy array , the state initial values of variables in ode
-    # t0 is the initial time
-    # deltat is the stepsize
+    # u0 is a numpy array , the state initial values of variables in ode； t0 is the initial time； deltat is the stepsize
     def euler_step(u0,t0,deltat):
         u1 = u0+deltat*func(u0,t0)
         t1 = t0 + deltat
@@ -95,7 +95,7 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
         return u2,t2
     
     u0 = u0
-    deltat = 0.001  # set deltat equals 0.001, which will give error of RK4 and euler less than 1e-4
+    deltat = 1e-6  # set deltat equals 1e-6, which will give very high accuracy of RK4 and euler 
     
     if method == 'euler':
         for i in range(int((tn-t0)/deltat)):
@@ -149,4 +149,21 @@ print(z2)
 print(z3)
 
 
+
+# unit test to test the solution
+class Test_ODE(unittest.TestCase):
+    def test_soln(self):
+        
+        z1 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'euler',(1,2))
+        # Account for accuracy: as the shooting solution will not exactly match the explicit solution. Set tolerance equals to 1e-6
+        if abs(z1[0]-math.sqrt(1)*math.cos(1)) < 1e-6 and abs(z1[1]-math.sqrt(1)*math.sin(1)) < 1e-6:  
+            print("Test passed")
+        else:
+            print("Test failed")
+        #self.assertAlmostEqual(z1[0],math.sqrt(1)*math.cos(1))
+        #self.assertAlmostEqual(z1[1],math.sqrt(1)*math.sin(1))
+        
+unittest.main(argv=[''],verbosity=2, exit=False)
+#if __name__ == '__main__':
+    #unittest.main()
 

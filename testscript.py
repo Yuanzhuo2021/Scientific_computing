@@ -11,4 +11,7 @@ class Test_ODE(unittest.TestCase):
     def test_soln(self):
         self.assertAlmostEquals(1,1)
         
-unittest.main(argv=[''],verbosity=0, exit=False)
+#unittest.main(argv=[''],verbosity=0, exit=False)
+
+if __name__ == '__main__':
+    unittest.main()
