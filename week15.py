@@ -120,14 +120,15 @@ def numerical_shooting(x0,y0,T):
     for i in range(int(T/deltat)):
         p,q=predator_prey(p,q,a,b,d,deltat)
     return [x0-p,y0-q,dxdt]
-
-# use fsolve in scripy, the pros are this is an existing function that is well-built to find roots,
-# the cons are we need give initial guess and it may not converge and it may give reuslt that is wrong.like T less than 0   
+    
 def solve(x,y,T):
+    
     x,y,z = fsolve(lambda u:numerical_shooting(u[0],u[1],u[2]),(x,y,T))
+    
+    print('The initial value gives a limit cycle is x = ' + str(x) +','+ 'y = '+ str(y) +' with a period '+ str(z) )
     return np.array([x,y,z])
 
 solve(0.3,0.3,10)
-z = fsolve(lambda u:numerical_shooting(u[0],u[1],u[2]),(0.1,0.1,8))
 
-print(z)
+# use fsolve in scripy, the pros are this is an existing function that is well-built to find roots,
+# the cons are we need give initial guess and it may not converge and it may give reuslt that is wrong.like T less than 0   
