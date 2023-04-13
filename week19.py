@@ -60,3 +60,7 @@ plt.plot(x,real_soln(x),x,u)
 plt.xlabel('x')
 plt.ylabel('u')
 plt.legend(['real solution','Finite difference'])
+
+
+# test the accuray, use finite difference, it equals real solution with an error tolerance 1e-3
+np.allclose(u,real_soln(x),1e-3)
