@@ -4,9 +4,6 @@ Created on Thu Apr 13 21:59:11 2023
 
 @author: YHU
 """
-
-## finite differenting
-
 import numpy as np
 
 
@@ -16,15 +13,33 @@ b = 10
 gamma1 = 1
 gamma2 = 2
 N =1000
-
+u_a = gamma1
+u_b = gamma2
 dx = (b-a)/N
 
 
-u_a = gamma1
-u_b = gamma2
-
 # second order differentiation: (u[i+1] -2u[i] + u[i-1])/(dx)^2 +q[i]= 0 .Because the source equation is 0, q[i] = 0.
 
-A = np.zeros((N+1,N+1))
+# use numpy to solve the system of equations. There are N-1 equations as there are N-1 unknowns.
+# build A-DD
+A = np.zeros((N-1,N-1))
 
+# the first row and the last row are quite different.We deal with them seperately
+A[0,0]=-2
+A[0,1]=1
+A[N-2,N-2]=-2
+A[N-2,N-3]=1
+
+# for the rest of the row, coefficient for u[i+1] is 1, u[i] is -2,u[i-1] is 1
+for i in range(N-1-2):
+    A[i+1,i]=1
+    A[i+1,i+1]=-2
+    A[i+1,i+2]=1
 print(A)
+
+#right side of the equations:b-DD
+B = np.zeros((N-1,1))
+#put initail and end conditions
+B[0,0]=u_a
+B[N-2,0]=u_b
+print(B)
