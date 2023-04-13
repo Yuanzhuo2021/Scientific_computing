@@ -43,3 +43,20 @@ B = np.zeros((N-1,1))
 B[0,0]=u_a
 B[N-2,0]=u_b
 print(B)
+
+# output the soln
+u = np.linalg.solve(A, -B)
+x = np.linspace(a, b, N-1)
+
+
+#explicite solution
+
+def real_soln(x):
+    soln = ((gamma2 - gamma1)/(b-a))*(x-a)+gamma1
+    return soln
+
+#plot 
+plt.plot(x,real_soln(x),x,u)
+plt.xlabel('x')
+plt.ylabel('u')
+plt.legend(['real solution','Finite difference'])
