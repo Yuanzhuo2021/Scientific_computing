@@ -5,7 +5,7 @@ Created on Thu Apr 13 21:59:11 2023
 @author: YHU
 """
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 # convert ode BVP into a system of algebraic equations
 a = 0 
@@ -35,32 +35,28 @@ for i in range(N-1-2):
     A[i+1,i]=1
     A[i+1,i+1]=-2
     A[i+1,i+2]=1
-print(A)
 
 #right side of the equations:b-DD
-B = np.zeros((N-1,1))
+B = np.zeros(N-1)
 #put initail and end conditions
-B[0,0]=u_a
-B[N-2,0]=u_b
-print(B)
+B[0]=u_a
+B[N-2]=u_b
 
-# output the soln
+
 u = np.linalg.solve(A, -B)
-x = np.linspace(a, b, N-1)
 
 
-#explicite solution
+# explicit solution
 
 def real_soln(x):
     soln = ((gamma2 - gamma1)/(b-a))*(x-a)+gamma1
     return soln
 
-#plot 
+x = np.linspace(a,b,N-1)
+# test the accuray, use finite difference, it equals real solution with an error tolerance 1e-3
+print(np.allclose(u,real_soln(x),1e-3))
+
 plt.plot(x,real_soln(x),x,u)
 plt.xlabel('x')
 plt.ylabel('u')
 plt.legend(['real solution','Finite difference'])
-
-
-# test the accuray, use finite difference, it equals real solution with an error tolerance 1e-3
-np.allclose(u,real_soln(x),1e-3)
