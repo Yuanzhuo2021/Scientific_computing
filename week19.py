@@ -31,7 +31,7 @@ A[N-2,N-2]=-2
 A[N-2,N-3]=1
 
 # for the rest of the row, coefficient for u[i+1] is 1, u[i] is -2,u[i-1] is 1
-for i in range(N-1-2):
+for i in range(N-3):
     A[i+1,i]=1
     A[i+1,i+1]=-2
     A[i+1,i+2]=1
@@ -43,8 +43,21 @@ B[0]=u_a
 B[N-2]=u_b
 
 
-u = np.linalg.solve(A, -B)
+# account for q term
+q = 1   # set q[i]= 1
+Q = np.zeros(N-1)
+for i in range(N-1):
+    Q[i] = q
 
+
+# parameter D in front of second derivative
+D = 2
+
+
+
+u = np.linalg.solve(A, -B-(((dx)**2)*Q)/D)
+
+# %%
 
 # explicit solution
 
@@ -57,6 +70,21 @@ x = np.linspace(a,b,N-1)
 print(np.allclose(u,real_soln(x),1e-3))
 
 plt.plot(x,real_soln(x),x,u)
+plt.xlabel('x')
+plt.ylabel('u')
+plt.legend(['real solution','Finite difference'])
+
+#%%
+
+def real_soln2(x):
+    soln = (-1/(2*D))*(x-a)*(x-b)+((gamma2-gamma1)/(b-a))*(x-a)+gamma1
+    return soln
+
+x = np.linspace(a,b,N-1)
+# test the accuray, use finite difference, it equals real solution with an error tolerance 1e-3
+print(np.allclose(u,real_soln2(x),1e-3))
+
+plt.plot(x,real_soln2(x),x,u)
 plt.xlabel('x')
 plt.ylabel('u')
 plt.legend(['real solution','Finite difference'])
