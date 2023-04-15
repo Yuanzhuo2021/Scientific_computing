@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import unittest
+from scipy.optimize import fsolve,root
 
 def shooting_ode_solver(func,u0,t0,tn,method,guess):
     """
@@ -95,19 +96,19 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
         return u2,t2
     
     
-    def numerical_shooting(guess):
-        u_0 = guess[:-1]
-        T0 = guess[-1] 
+    def numerical_shooting(s):
+        u_0 = s[:-1]
+        T0 = s[-1] 
         t_0 = t0
         #dxdt = func(u_0,t_0)
-        for i in range(int(T0/deltat)):
+        for i in range(int(abs(T0)/deltat)):
             u_0,t_0=euler_step(u_0,t_0,deltat)
-        return np.array([guess[:-1]-n.array(u_0),func(u_0,t_0)])
+        return np.append(s[:-1]-np.array(u_0),func(u_0,t_0)[0])
 
     # use fsolve in scripy, the pros are this is an existing function that is well-built to find roots,
     # the cons are we need give initial guess and it may not converge and it may give reuslt that is wrong.like T less than 0   
     def solve(guess):
-        x = fsolve(numerical_shooting,guess)
+        result = root(lambda s: numerical_shooting(s),(guess))
         #if result.success:
             #print('success')
         #else:
@@ -115,9 +116,12 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
         return result
     
     u0 = u0
-    deltat = 1e-6  # set deltat equals 1e-6, which will give very high accuracy of RK4 and euler 
+    t0 = t0
+    deltat = 1e-3  # set deltat equals 1e-6, which will give very high accuracy of RK4 and euler 
     
     result = solve(guess)
+    test = np.allclose(numerical_shooting(result.x),0,1e-3)
+    
     
     if method == 'euler':
         for i in range(int((tn-t0)/deltat)):
@@ -132,11 +136,10 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
             u0,t0 = midpoint(u0,t0,deltat)
                 
       
-    
-    return u0,result
+    return [u0,result.x,test]
 
 
-
+#%%
 
 
 # use d^2x/dt^2 = -x ode to test if the function we built get the correct result
@@ -147,15 +150,26 @@ def func(u,t):
     dydt = -x
     return np.array([dxdt,dydt])
 
-z1 = shooting_ode_solver(func,(1,1),0,1,'euler',(1,2))
-z2 = shooting_ode_solver(func,(1,1),0,1,'RK4',(1,2))
-z3 = shooting_ode_solver(func,(1,1),0,1,'midpoint',(1,2))
+z1 = shooting_ode_solver(func,(1,0),0,1,'euler',(1,0,6))
+z2 = shooting_ode_solver(func,(1,0),0,1,'RK4',(1,0,6))
+z3 = shooting_ode_solver(func,(1,0),0,1,'midpoint',(1,0,6))
 
 print(z1)
 print(z2)
 print(z3)
 # the answer is close to the correct value of solution x at t =1
+#%%
 
+def predator_prey(u,t0):
+    a = 1
+    b = 0.1
+    d = 0.1
+    du1dt = u[0]*(1-u[1])-(a*u[0]*u[1])/(d+u[0])
+    du2dt = b*u[1]*(1-u[1]/u[0])
+    return np.array([du1dt,du2dt])
+
+z1 = shooting_ode_solver(predator_prey,(1,1),0,1,'euler',(0.3,0.3,10))
+print(z1)
 
 ##ODE for the Hopf bifurcation normal form
 def Hopf_bifurcation(u,t0):
@@ -166,9 +180,9 @@ def Hopf_bifurcation(u,t0):
     du2dt = u1+beta*u2+sigma*u2*(u1**2+u2**2)
     return np.array([du1dt,du2dt])
 
-z1 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'euler',(1,2))
-z2 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'RK4',(1,2))
-z3 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'midpoint',(1,2))
+z1 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'euler',(1,1,1))
+z2 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'RK4',(1,1,1))
+z3 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'midpoint',(1,1,1))
 
 print(z1)
 print(z2)
@@ -180,9 +194,9 @@ print(z3)
 class Test_ODE(unittest.TestCase):
     def test_soln(self):
         
-        z1 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'euler',(1,2))
+        z1 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'euler',(1,1,1))
         # Account for accuracy: as the shooting solution will not exactly match the explicit solution. Set tolerance equals to 1e-6
-        if abs(z1[0]-math.sqrt(1)*math.cos(1)) < 1e-6 and abs(z1[1]-math.sqrt(1)*math.sin(1)) < 1e-6:  
+        if abs(z1[0][0]-math.sqrt(1)*math.cos(1)) < 1e-3 and abs(z1[0][1]-math.sqrt(1)*math.sin(1)) < 1e-3:  
             print("Test passed")
         else:
             print("Test failed")
