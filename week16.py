@@ -58,7 +58,7 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
    
     Returns
     ----------
-    Returns a solution at t = t_span, returns plots of varibale agianst time between[0,t_span]. Plot the phase portrait. 
+    Returns a solution at t = tn, returns plots of varibale agianst time between[0,t_span]. Plot the phase portrait. 
     Returns initial values to have limit cycles. output its period.
 
 
@@ -96,45 +96,64 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
         return u2,t2
     
     
-    def numerical_shooting(s):
+    def numerical_shooting(method,s):
         u_0 = s[:-1]
-        T0 = s[-1] 
+        T = s[-1] 
         t_0 = t0
         #dxdt = func(u_0,t_0)
-        for i in range(int(abs(T0)/deltat)):
-            u_0,t_0=euler_step(u_0,t_0,deltat)
+        if method == 'euler':
+            for i in range(int(T/deltat)):
+                u_0,t_0 = euler_step(u_0,t_0,deltat)
+        elif method == 'RK4':
+            for i in range(int(T/deltat)):
+                u_0,t_0 = RK4(u_0,t_0,deltat)
+        elif method == 'midpoint':
+            for i in range(int(T/deltat)):
+                u_0,t_0 = midpoint(u_0,t_0,deltat)
+        else:
+            print('Wrong input method')
+        
         return np.append(s[:-1]-np.array(u_0),func(u_0,t_0)[0])
+    
+    
 
-    # use fsolve in scripy, the pros are this is an existing function that is well-built to find roots,
+    # use fsolve in scipy, the pros are this is an existing function that is well-built to find roots,
     # the cons are we need give initial guess and it may not converge and it may give reuslt that is wrong.like T less than 0   
     def solve(guess):
-        result = root(lambda s: numerical_shooting(s),(guess))
-        #if result.success:
-            #print('success')
-        #else:
-            #print('failed to converge')
-        return result
+        result = root(lambda s: numerical_shooting(method,s),(guess))
+        if result.success:
+            result1 = result
+        else:
+            print('failed to converge')
+            print(result.Msg)
+        return result1
     
     u0 = u0
-    t0 = t0
+    t = t0
     deltat = 1e-3  # set deltat equals 1e-6, which will give very high accuracy of RK4 and euler 
-    
-    result = solve(guess)
-    test = np.allclose(numerical_shooting(result.x),0,1e-3)
-    
-    
+    soln = []
+
     if method == 'euler':
         for i in range(int((tn-t0)/deltat)):
             u0,t0 = euler_step(u0,t0,deltat)
-    
+            soln.append(u0[0])
     elif method == 'RK4':
         for i in range(int((tn-t0)/deltat)):
             u0,t0 = RK4(u0,t0,deltat)
-            
+            soln.append(u0[0])
     elif method == 'midpoint':
         for i in range(int((tn-t0)/deltat)):
             u0,t0 = midpoint(u0,t0,deltat)
-                
+            soln.append(u0[0])
+    
+    result = solve(guess)
+    test = np.allclose(numerical_shooting(method,result.x),0,1e-3)
+    
+    #t = np.linspace(t0,tn,int((tn-t0)/deltat))
+    #plt.plot(t,soln)
+    t_span = np.linspace(t,tn,int((tn-t)/deltat))
+
+    plt.plot(t_span,soln)       
       
     return [u0,result.x,test]
 
@@ -151,12 +170,12 @@ def func(u,t):
     return np.array([dxdt,dydt])
 
 z1 = shooting_ode_solver(func,(1,0),0,1,'euler',(1,0,6))
-z2 = shooting_ode_solver(func,(1,0),0,1,'RK4',(1,0,6))
-z3 = shooting_ode_solver(func,(1,0),0,1,'midpoint',(1,0,6))
+#z2 = shooting_ode_solver(func,(1,0),0,1,'RK4',(1,0,6))
+#z3 = shooting_ode_solver(func,(1,0),0,1,'midpoint',(1,0,6))
 
 print(z1)
-print(z2)
-print(z3)
+#print(z2)
+#print(z3)
 # the answer is close to the correct value of solution x at t =1
 #%%
 
@@ -171,6 +190,7 @@ def predator_prey(u,t0):
 z1 = shooting_ode_solver(predator_prey,(1,1),0,1,'euler',(0.3,0.3,10))
 print(z1)
 
+#%%
 ##ODE for the Hopf bifurcation normal form
 def Hopf_bifurcation(u,t0):
     u1,u2 = u
@@ -188,7 +208,7 @@ print(z1)
 print(z2)
 print(z3)
 
-
+#%%
 
 # unit test to test the solution
 class Test_ODE(unittest.TestCase):
