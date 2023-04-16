@@ -15,6 +15,24 @@ def algebraic_cubic(u):
     return x**3 - x + c
 
 def continuation(func,rang,guess):
+    """
+    
+
+    Parameters
+    ----------
+    func : TYPE
+        DESCRIPTION.
+    rang : TYPE
+        DESCRIPTION.
+    guess : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    list
+        DESCRIPTION.
+
+    """
     S = 1000
     step = (rang[1]-rang[0])/S
     C = []
@@ -78,12 +96,26 @@ plt.plot(beta,u1,beta,u2)
 
 
 # delta is the secant of state vector
-#delta = np.array([z[0][1],z[1][1]])-np.array([z[0][0],z[1][0]])
-
-
 
 def psuedo_arclength_continuation(func,rang,guess):
+    """
     
+
+    Parameters
+    ----------
+    func : A function 
+        DESCRIPTION.
+    rang : TYPE
+        DESCRIPTION.
+    guess : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    list
+        DESCRIPTION.
+
+    """
     
     z = continuation(func,rang,guess)
     if len(z[0])>=2 and len(z[1])>=2:
