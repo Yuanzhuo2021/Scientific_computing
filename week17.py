@@ -9,42 +9,37 @@ import numpy as np
 from scipy.optimize import fsolve,root
 import matplotlib.pyplot as plt
 
-def algebraic_cubic(x,c):
-    return x**2 - x + c
 
-def continuation(func,rang):
+def algebraic_cubic(u):
+    x,c = u
+    return x**3 - x + c
+
+def continuation(func,rang,guess):
     S = 1000
     step = (rang[1]-rang[0])/S
-    # first generate the first value of solution
-    result= root(lambda u: func(u,rang[0]),-2)
-    print(rang[0])
-    print(result.x)
-    solution = result.x
-    C = [rang[0]]
+    C = []
+    solution = []
     for i in range(S):
-        c = rang[0] + step*(i+1)
-        result = root(lambda u: func(u,c),result.x)
+        c = rang[0] + step*(i)
+        result = root(lambda x: func((x,c)),guess)
         if result.success:
-            result = result
             C.append(c)
             solution = np.hstack((solution,result.x))
+            result = guess
         else:
             print(result.message)
             print('Converge fails at c = ',c)
             break
-        
-    return [C,solution]
+    return [solution,C]
 
-z = continuation(algebraic_cubic,(-2,2))
+z = continuation(algebraic_cubic,(-2,2),2)
 
-
-
-plt.plot(z[0],z[1])
+plt.plot(z[1],z[0])
 plt.xlabel('Parameter')
 plt.ylabel('Solution')
 
 
-
+#%%
 
 
 
@@ -77,8 +72,53 @@ print(t)
 print(u1)
 plt.figure()
 plt.plot(beta,u1,beta,u2)
+       
+
+#%%
+
+
+# delta is the secant of state vector
+#delta = np.array([z[0][1],z[1][1]])-np.array([z[0][0],z[1][0]])
+
+
+
+def psuedo_arclength_continuation(func,rang,guess):
+    
+    
+    z = continuation(func,rang,guess)
+    if len(z[0])>=2 and len(z[1])>=2:
+        # get the first two solns using natural parameter continuation
+        u0 = np.array([z[0][0],z[1][0]])
+        u1 = np.array([z[0][1],z[1][1]])  # solution, C
         
+        
+       # print(delta) 
+        soln = [z[0][0],z[0][1]]
+        param = [z[1][0],z[1][1]]
+        
+        def pseudo_equation(u,u2):
+            return [np.dot((u-u2),delta),func(u)]
+        
+        for i in range(1000):
+            
+            delta = (u1-u0)
+            u2 = u1 + delta # estimated value
+            true_value = root(lambda u: pseudo_equation(u,u2),u2) # true value of u2
 
+            if true_value.success:
+                soln.append(true_value.x[0])
+                param.append(true_value.x[-1])
+                u0 = u1
+                u1 = true_value.x
+                
+            else:
+                print('converge fails at c =',u1[-1])
+                break
+    else:
+        print('Converges fail, please choose a new guess')
+    return [param,soln]
 
+zz = psuedo_arclength_continuation(algebraic_cubic,(-2,2),2)
+print(zz[0])
 
-
+plt.plot(zz[0],zz[1])
