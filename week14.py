@@ -2,7 +2,7 @@
 """
 Spyder Editor
 
-This is a temporary script file.
+This is a ode_solver script file.
 """
 
 
@@ -12,10 +12,7 @@ import math
 import time
 
 
-
-
-# , the state initial values of variables in ode； t0 is the initial time； deltat is the stepsize
-def euler_step(func,u0,t0,deltat):
+def euler(func,u0,t0,deltat):
     """
     single step of euler's method works for any dimension of ode
     
@@ -149,59 +146,7 @@ def midpoint(u0,t0,deltat):
     return u2,t2
 
 
-
-
-
-
-
-
-#define ode function
-def f(x,t):
-    return x
-
-    
-
-
-#the solution to the ode equation
-
-#initial values
-
-error_euler = []
-error_RK4 = []
-Time = []
-Time2 =[]
-
-#step size
-deltat = [1,0.5,0.2,0.1,0.05,0.02,0.01,0.005,0.002,0.001,0.0005,0.0002,0.0001]
-
-for ele in deltat:
-    t0,x0,y0 =0,1,1
-    num_steps = 1/ele
-    i =1
-    
-    while i <= num_steps:
-        x0 = euler_step(f,x0,t0,ele)
-        y0 =RK4(f,y0,t0,ele)
-        t0 = t0+ele
-        i += 1
-        
-    x_true = math.exp(1)
-    error_euler.append(abs(x_true - x0))
-    error_RK4.append(abs(x_true-y0))
-
-print(x0)
-print(y0)
-
-#plot the errors against deltat of two methods
-plt.plot(deltat,error_euler,deltat,error_RK4)
-plt.yscale('log')
-plt.xscale('log')
-plt.xlabel('stepsize')
-plt.ylabel('Error')
-plt.title('Error of RK4 and Euler method against stepsize deltat')
-plt.legend(["Euler","RK4"], loc ="lower right")
-
-
+#%%
 
 def solve_to(func,x1,t1,t2,method,deltat_max):
     """
@@ -229,108 +174,160 @@ def solve_to(func,x1,t1,t2,method,deltat_max):
     """
     soln = []
     deltat = t2-t1
+    # change the deltat until it is smaller than deltat_max
     while deltat >= deltat_max:
-        deltat = deltat/10
-     
+        deltat = deltat/10 
     num_steps = (t2-t1)/deltat
-    if method == 'euler':
-        for i in range(0,num_steps):
-            x1 = euler_step(func,x1,t1,deltat)
-            t1 = t1+deltat
-    elif method == 'RK4':
-        for i in range(0,num_steps):
-            x1 = RK4(func,x1,t1,deltat)
-            t1 = t1+deltat
-    elif method == 'midpoint':
-        for i in range(0,num_steps):
-            x1 = midpoint(func,x1,t1,deltat)
-            t1 = t1+deltat
-
-    else:
-            print('Wrong input,please try again')
     
-                    
-    soln.append(method)
+    # method defines the method to solve ode
+    if method == 'euler':
+        for i in range(0,int(num_steps)):
+            x1,t1 = euler(func,x1,t1,deltat)
+    elif method == 'RK4':
+        for i in range(0,int(num_steps)):
+            x1,t1 = RK4(func,x1,t1,deltat)
+    elif method == 'midpoint':
+        for i in range(0,int(num_steps)):
+            x1,t1 = midpoint(func,x1,t1,deltat)
+    else:
+        x1 = 'nan'
+        method = 'nan'
+        print('Wrong input method,please try again')
+    
     soln.append(str(x1))
+    soln.append(str(t2))
+    soln.append(method)
     return soln
 
-z = solve_to(1,0,1,0.001)
-print('The x2 value using ' + z[0] +' method is '+ z[1])
+
+#%%
 
 
-
-#output the errors,see the value of deltats give the same error
-
-print(error_euler)
-print(error_RK4)
-
-#print the error,  we see that the error is the same around 0.003 when deltat is 0.0002 for Euler method and 0.002 for RK4. Calculate the run time
-
-
-i = 1
-x0 = 1
-t0 = 0
-t1 = time.time()
-while i <= 1/0.0002:
-    x0 = euler_step(x0,t0,0.0002)
-    t0 = t0+0.0002
-    i += 1
-Time1 = time.time()-t1
-print('The running time of Euler method solving ode with an error of 0.003 is ' + str(Time1))
-
-
-i = 1
-x0 = 1
-t0 = 0
-t2 = time.time()
-while i <= 1/0.002:
-    x0 = RK4(x0,t0,0.002)
-    t0 = t0+0.002
-    i += 1
-Time2 = time.time()-t2
-
-
-print('The running time of RK4 method solving ode with an error of 0.003 is ' + str(Time2))
+if __name__=='__main__':
     
-
-
-def solve_ode(deltat):
+    #define ode function
+    def func(x,t):
+        dxdt = x 
+        return dxdt
     
-    x0,y0 = 1,1
-    X0,Y0 = 1,1
-    solution_euler = [x0]
-    solution_RK4 = [X0]
-    t = np.linspace(0, 1, int(1/deltat) + 1)
+    def func1(u,t):
+        x,y = u
+        dxdt = y
+        dydt = -x
+        return np.array([dxdt,dydt])
+
+    z = solve_to(func,1,0,1,'RK4',0.001)
+    print('The solution of ode at t = '+ z[1] +' using ' + z[2]+' method is '+ z[0])
+
+#%%
+
+    '''Error of RK4 and Euler method against stepsize deltat'''
     
-    for i in range(int(1/deltat)):
-        y0,x0 = second_order_euler(y0,x0,deltat)
-        Y0,X0 = second_order_RK4(Y0,X0,deltat)
-        solution_euler.append(x0)
-        solution_RK4.append(X0)
-    return t,solution_euler,solution_RK4
+    error_euler = []
+    error_RK4 = []
+    Time = []
+    Time2 =[]
 
-t1,soln1_euler,soln1_RK4 = solve_ode(0.1)
-t2,soln2_euler,soln2_RK4 = solve_ode(0.01)
+    #step size
+    deltat = [1,0.5,0.2,0.1,0.05,0.02,0.01,0.005,0.002,0.001]
 
-plt.plot(t1, soln1_euler, 'b',label='Euler(deltat=0.1)')
-plt.plot(t1, soln1_RK4, 'k',label='RK4(deltat=0.1)')
-plt.plot(t2, soln2_euler, 'g-',label='Euler(deltat=0.01)')
-plt.plot(t2, soln2_RK4, 'y-',label='RK4(deltat=0.01)')
-plt.plot(t2,np.sin(t2)+np.cos(t2),'r',label='real solution')
-plt.ylabel('x')
-plt.xlabel('t')
-plt.legend()
-plt.title('solution to second order ode using different size of timestep')
-plt.show()
+    for ele in deltat:
+        t0,x0,y0 =0,1,1
+        num_steps = 1/ele
+    
+        for i in range(0,int(num_steps)):
+            x0,t0 = euler(func,x0,t0,ele)
+            y0,t0 =RK4(func,y0,t0,ele)
+
+        x_true = math.exp(1)
+        error_euler.append(abs(x_true - x0))
+        error_RK4.append(abs(x_true-y0))
+
+    #plot the errors against deltat of two methods
+    plt.plot(deltat,error_euler,deltat,error_RK4)
+    plt.yscale('log')
+    plt.xscale('log')
+    plt.xlabel('stepsize')
+    plt.ylabel('Error')
+    plt.title('Error of RK4 and Euler method against stepsize deltat')
+    plt.legend(["Euler","RK4"], loc ="lower right")
 
 
 
 
-deltat = 0.001
-x0,t0  = 1,0
-for i in range (int(1/deltat)):
-    x0,t0 = midpoint(x0,t0,deltat)
 
-print(x0)
+    #%%
+    #output the errors,see the value of deltats give the same error
+
+    print(error_euler)
+    print(error_RK4)
+    #%%
+    #print the error,  we see that the error is the same around 0.001 when deltat is 0.01 for Euler method and 0.5 for RK4. Calculate the run time
+
+
+    #calculate the run time for euler 
+    x0 = (1,1)
+    t0 = 0
+    t1 = time.time()
+    for i in range(0,int(1/0.01)):
+        x0,t0 = euler(func1,x0,t0,0.01)
+        Time1 = time.time()-t1
+    print('The running time of Euler method solving ode with an error of 0.003 is ' + str(Time1))
+
+
+    #calculate the run time for RK4
+    x0 = (1,1)
+    t0 = 0
+    t2 = time.time()
+    for i in range(0,int(1/0.5)):
+        x0,t0 = RK4(func1,x0,t0,0.5)
+        Time2 = time.time()-t2
+    print('The running time of RK4 method solving ode with an error of 0.003 is ' + str(Time2))
+        
+    #%%
+    
+    ''' plot the ode solution against time '''
+    
+    def plot_ode(deltat):
+        """
+        This function is used to plot the solution to ode by using euler and RK4 with different stepsize 
+    
+        def func1(u,t):
+            x,y = u
+            dxdt = y
+            dydt = -x
+            return np.array([dxdt,dydt])
+    
+        """
+        t0 = 0
+        x0 = (1,1)
+        X0 = (1,1)
+        solution_euler = [x0[0]]
+        solution_RK4 = [X0[0]]
+        t = np.linspace(0, 1, int(1/deltat) + 1)
+    
+        for i in range(0,int(1/deltat)):
+            x0,t0 = euler(func1,x0,t0,deltat)
+            X0,t0 = RK4(func1,X0,t0,deltat)
+            solution_euler.append(x0[0])
+            solution_RK4.append(X0[0])
+        return t,solution_euler,solution_RK4
+    
+    t1,soln1_euler,soln1_RK4 = plot_ode(0.1)
+    t2,soln2_euler,soln2_RK4 = plot_ode(0.01)
+    
+    plt.figure()
+    plt.plot(t1, soln1_euler, 'b',label='Euler(deltat=0.1)')
+    plt.plot(t1, soln1_RK4, 'k',label='RK4(deltat=0.1)')
+    plt.plot(t2, soln2_euler, 'g-',label='Euler(deltat=0.01)')
+    plt.plot(t2, soln2_RK4, 'y-',label='RK4(deltat=0.01)')
+    plt.plot(t2,np.sin(t2)+np.cos(t2),'r',label='real solution')
+    plt.ylabel('x')
+    plt.xlabel('t')
+    plt.legend()
+    plt.title('solution to second order ode using different stepsize')
+    plt.show()
+
+
 
 
