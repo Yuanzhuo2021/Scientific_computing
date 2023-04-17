@@ -14,30 +14,150 @@ import time
 
 
 
+# , the state initial values of variables in ode； t0 is the initial time； deltat is the stepsize
+def euler_step(func,u0,t0,deltat):
+    """
+    single step of euler's method works for any dimension of ode
+    
+    Parameters
+    ----------
+    func: ode function
+        An n-th order ordinary differential equation we are solving. It has to be written 
+        in a system of n first-order odes.Also,the parameters should be included 
+        in the 'func'.The func returns a numpy array with u1,u2,u3...un
+        
+        Example: A predator_prey ode function can be written as below:
+        def predator_prey(u,t):
+            x,y = u
+            a = a
+            b = b
+            d = d
+            dxdt = x*(1-x)-(a*x*y)/(d+x)
+            dydt = b*y*(1-y/x)
+            return np.array([dxdt,dydt])
+        
+    u0 :numpy.array 
+        The state initial values of variables in ode
+    t0 : int/float
+        Initial time
+    deltat : float
+        The stepsize
+
+    Returns
+    -------
+    u1 : numpy.array
+        The solution to the system of odes 
+    t1 : int/float
+        updated t0 after one step euler 
+        
+    """
+    u1 = u0+deltat*func(u0,t0)
+    t1 = t0 + deltat
+    return u1,t1
+
+
+#single step of 4th Runge-Kutta method
+def RK4(func,u0,t0,deltat):
+    """
+    single step of fourth Runge-Kutta method works for any dimension of ode
+    
+    Parameters
+    ----------
+    func: ode function
+        An n-th order ordinary differential equation we are solving. It has to be written 
+        in a system of n first-order odes.Also,the parameters should be included in 
+        the 'func'.The func returns a numpy array with u1,u2,u3...un
+        
+        Example: A predator_prey ode function can be written as below:
+        def predator_prey(u,t):
+            x,y = u
+            a = a
+            b = b
+            d = d
+            dxdt = x*(1-x)-(a*x*y)/(d+x)
+            dydt = b*y*(1-y/x)
+            return np.array([du1dt,du2dt])
+    
+    u0 : numpy.array 
+        The state initial values of variables in ode
+    t0 : int/float
+        Initial time
+    deltat : float
+        The stepsize
+
+    Returns
+    -------
+    u1 : numpy.array
+        The solution to the system of odes after one step of RK4
+    t1 : int/float
+        updated t0 after one step euler 
+        
+    """
+
+    k1 = func(u0,t0)  
+    k2 = func(u0+deltat*k1*0.5,t0+deltat/2)
+    k3 = func(u0+deltat*k2*0.5,t0+deltat/2)
+    k4 = func(u0+deltat*k3,t0+deltat)
+    #update u0,t0 value
+    u1 = u0+deltat*(k1+2*k2+2*k3+k4)/6
+    t1 = t0 + deltat
+    return u1,t1
+    
+
+# implement midpoint method
+def midpoint(u0,t0,deltat):
+    """
+    single step of midpoint method works for any dimension of ode
+    
+    Parameters
+    ----------
+    func: ode function
+        An n-th order ordinary differential equation we are solving. It has to be 
+        written in a system of n first-order odes.Also,the parameters should
+        be included in the 'func'.The func returns a numpy array with u1,u2,u3...un
+        
+        Example: A predator_prey ode function can be written as below:
+        def predator_prey(u,t):
+            x,y = u
+            a = a
+            b = b
+            d = d
+            dxdt = x*(1-x)-(a*x*y)/(d+x)
+            dydt = b*y*(1-y/x)
+            return np.array([du1dt,du2dt])
+    
+    u0 : numpy.array 
+        The state initial values of variables in ode
+    t0 : int/float
+        Initial time
+    deltat : float
+        The stepsize
+
+    Returns
+    -------
+    u1 : numpy.array
+        The solution to the system of odes after one step of midpoint method
+    t1 : int/float
+        updated t0 after one step midpoint method
+
+   """
+    t1 = t0+0.5*deltat
+    u1 = u0 + 0.5*deltat*func(u0,t0)
+    k = func(u1,t1)
+    t2 = t0 + deltat
+    u2 = u0 + deltat*k
+    return u2,t2
+
+
+
+
+
+
+
+
 #define ode function
 def f(x,t):
     return x
-
-
-
-# single step of euler's method 
-def euler_step(x0,t0,deltat):
-    x1 = x0+deltat*f(x0,t0)
-    return x1
-
-
-##single step of 4th Runge-Kutta method
-
-def RK4(x0,t0,h):
-    k1 = f(x0,t0) 
-    k2 = f(x0+h*k1*0.5,t0+h/2)
-    k3 = f(x0+h*k2*0.5,t0+h/2)
-    k4 = f(x0+h*k3,t0+h)
-        
-    #update x0 value
-    x1 = x0+h*(k1+2*k2+2*k3+k4)/6
-    return x1
-
 
     
 
@@ -60,8 +180,8 @@ for ele in deltat:
     i =1
     
     while i <= num_steps:
-        x0 = euler_step(x0,t0,ele)
-        y0 =RK4(y0,t0,ele)
+        x0 = euler_step(f,x0,t0,ele)
+        y0 =RK4(f,y0,t0,ele)
         t0 = t0+ele
         i += 1
         
@@ -83,37 +203,52 @@ plt.legend(["Euler","RK4"], loc ="lower right")
 
 
 
-def solve_to(x1,t1,t2,deltat_max):
+def solve_to(func,x1,t1,t2,method,deltat_max):
+    """
+    This function is allow user to choose any method(euler,RK4,midpoint) to solve ode at t = t2
+
+    Parameters
+    ----------
+    x1 : numpy.array
+        Initial values of state
+    t1 : int/float
+        Initial time
+    t2 : int/float
+        user wants the solution at t = t2
+    method : string
+        user input, type 'euler' for euler's method, 'RK4' for 4th Runge Kutta method, 
+        'midpoint' for midpoint method
+    deltat_max : int/float
+        The maximum stepsize allowed
+
+    Returns
+    -------
+    soln : numpy.array
+        solution to the ode at t= t2
+
+    """
     soln = []
     deltat = t2-t1
     while deltat >= deltat_max:
         deltat = deltat/10
      
     num_steps = (t2-t1)/deltat
-    i =1
+    if method == 'euler':
+        for i in range(0,num_steps):
+            x1 = euler_step(func,x1,t1,deltat)
+            t1 = t1+deltat
+    elif method == 'RK4':
+        for i in range(0,num_steps):
+            x1 = RK4(func,x1,t1,deltat)
+            t1 = t1+deltat
+    elif method == 'midpoint':
+        for i in range(0,num_steps):
+            x1 = midpoint(func,x1,t1,deltat)
+            t1 = t1+deltat
+
+    else:
+            print('Wrong input,please try again')
     
-    #ask user to choose a method to solve ode
-    while True:
-        try:
-            method = input('Please choose a method to solve ode problem: Type RK4 or Euler ')
-            if method == 'RK4':
-                while i <= num_steps:
-                    x1 = euler_step(x1,t1,deltat)
-                    t1 = t1+deltat
-                    i += 1
-                break
-                    
-            elif method == 'Euler':
-                while i <= num_steps:
-                    x1 = RK4(x1,t1,deltat)
-                    t1 = t1+deltat
-                    i += 1
-                break
-                    
-            else:
-                print('Wrong input,please try again')
-        except:
-            continue
                     
     soln.append(method)
     soln.append(str(x1))
@@ -159,42 +294,6 @@ print('The running time of RK4 method solving ode with an error of 0.003 is ' + 
     
 
 
-
-
-
-#define ode function  dy/dx = -x
-def f1(y,x):
-    return -x
-
-#define ode function dx/dy = y
-def f2(x,y):
-    return y
-
-
-# single step of euler's method 
-def second_order_euler(y0,x0,deltat):
-    y1 = y0+deltat*f1(y0,x0)
-    x1 = x0+deltat*f2(x0,y1)
-    return y1,x1
-
-def second_order_RK4(y,x,h):
-    k1 = f1(y,x) 
-    K1 = f2(x,y)
-    k2 = f1(y+h*K1*0.5,x+h/2)
-    K2 = f2(x+h*k1*0.5,y+h/2)
-    k3 = f1(y+h*K2*0.5,x+h/2)
-    K3 = f2(x+h*k2*0.5,y+h/2)
-    k4 = f1(y+h,x+h*K3)
-    K4 = f2(x+h,y+h*k3)
-  
-    
-    #update x0 value
-    y1 = y +h*(k1+2*k2+2*k3+k4)/6
-    x1 = x +h*(K1+2*K2+2*K3+K4)/6
-    return y1,x1
-
-
-
 def solve_ode(deltat):
     
     x0,y0 = 1,1
@@ -226,18 +325,6 @@ plt.show()
 
 
 
-
-
-#implement midpoint method to solve ode
-
-
-def midpoint(x0,t0,deltat):
-    t1 = t0+0.5*deltat
-    x1 = x0 + 0.5*deltat*f(x0,t0)
-    k = f(x1,t1)
-    t2 = t0 + deltat
-    x2 = x0 + deltat*k
-    return x2,t2
 
 deltat = 0.001
 x0,t0  = 1,0
