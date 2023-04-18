@@ -8,13 +8,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import root
 from scipy.optimize import fsolve
+import ode_solver
 
 #define the predator_prey function as a system of odes
 def predator_prey(x0,y0,a,b,d,deltat):
     dxdt = x0*(1-x0)-(a*x0*y0)/(d+x0)
     dydt = b*y0*(1-y0/x0)
-    x1 = x0 + dxdt*deltat
-    y1 = y0 + dydt*deltat
     return x1,y1
 
 
