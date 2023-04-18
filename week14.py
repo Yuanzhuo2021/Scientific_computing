@@ -168,8 +168,9 @@ def solve_to(func,x1,t1,t2,method,deltat_max):
 
     Returns
     -------
-    soln : numpy.array
-        solution to the ode at t= t2
+    soln : list
+        the first element in the list is the numpy array containing all solutions for each timestep
+        the second element is the numpy array containing all time from t1 to t2, one stepsize interval
 
     """
     soln = np.reshape(x1,(-1,1))
@@ -183,7 +184,9 @@ def solve_to(func,x1,t1,t2,method,deltat_max):
     # method defines the method to solve ode
     if method == 'euler':
         for i in range(0,int(num_steps)):
+            #use euler method to solve ode (one step)
             x1,t1 = euler(func,x1,t1,deltat)
+            #store solution 
             xr= np.reshape(x1,(-1,1))
             soln = np.column_stack((soln,xr))
     elif method == 'RK4':
@@ -266,8 +269,8 @@ if __name__=='__main__':
     #%%
     #output the errors,see the value of deltats give the same error
 
-    print(error_euler)
-    print(error_RK4)
+    #print(error_euler)
+    #print(error_RK4)
     #%%
     #print the error,  we see that the error is the same around 0.001 when deltat is 0.01 for Euler method and 0.5 for RK4. Calculate the run time
 
@@ -332,7 +335,7 @@ if __name__=='__main__':
     plt.ylabel('x')
     plt.xlabel('t')
     plt.legend()
-    plt.title('solution to second order ode using different stepsize')
+    plt.title('solution to second order ode using different stepsizes')
     plt.show()
 
 
