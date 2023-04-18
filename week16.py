@@ -9,8 +9,9 @@ import matplotlib.pyplot as plt
 import math
 import unittest
 from scipy.optimize import fsolve,root
+import ode_solver
 
-def shooting_ode_solver(func,u0,t0,tn,method,guess):
+def shooting(func,guess):
     """
     This function uses numerical shooting method, root finding method and numerical integrators to solve ordinary differential equations. 
     It includes finding the limit cycles and phase condition, plotting phase portraits and variables agaisnt time. 
@@ -24,12 +25,13 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
         Example: A predator_prey ode function can be written as below:
         
         def predator_prey(u,t):
+            x,y = u
             a = a
             b = b
             d = d
-            du1dt = u[0]*(1-u[1])-(a*u[0]*u[1])/(d+u[0])
-            du2dt = b*u[1]*(1-u[1]/u[0])
-            return np.array([du1dt,du2dt])
+            dxdt = x*(1-y)-(a*x*y)/(d+x)
+            dydt = b*y*(1-y/x)
+            return np.array([dxdt,dydt])
             
         where u is the state vector : u = [u1,u2]. u1,u2 are number of preys and predators(variables we want to solve).t is initial time when u1,u2 
         get initial values. a, b, d are parameters in the model.The output is a numpy array of du1/dt and du2/dt, which will be used to in our shooting function later.
@@ -37,12 +39,6 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
         
         parameters that are needed in the 'func',you need to specify the initial values.
         Example: for predator prey ode function, func = predator_prey(u1,u2,a,b,d), u1,u2,a,b,d you need to give them values
-        
-    u0:
-        Initial values for variables in a numpy array.E.g. u1,u2,u3.. 
-         
-    t_span : 
-        Input a time span t_span, which is a integer.The solution will get after t_span 
         
              
     method:
@@ -58,104 +54,63 @@ def shooting_ode_solver(func,u0,t0,tn,method,guess):
    
     Returns
     ----------
-    Returns a solution at t = tn, returns plots of varibale agianst time between[0,t_span]. Plot the phase portrait. 
+    
     Returns initial values to have limit cycles. output its period.
 
 
      """
     # Here is the code that does the shooting
     
-    # single step of euler's method work for all ode 
-    # u0 is a numpy array , the state initial values of variables in ode； t0 is the initial time； deltat is the stepsize
-    def euler_step(u0,t0,deltat):
-        u1 = u0+deltat*func(u0,t0)
-        t1 = t0 + deltat
-        return u1,t1
-
-
-    ##single step of 4th Runge-Kutta method
-    #ref: https://math.stackexchange.com/questions/721076/help-with-using-the-runge-kutta-4th-order-method-on-a-system-of-2-first-order-od
+    method = 'RK4'
     
-    def RK4(u0,t0,deltat):
-        k1 = func(u0,t0) 
-        k2 = func(u0+deltat*k1*0.5,t0+deltat/2)
-        k3 = func(u0+deltat*k2*0.5,t0+deltat/2)
-        k4 = func(u0+deltat*k3,t0+deltat)
-        #update u0 value
-        u1 = u0+deltat*(k1+2*k2+2*k3+k4)/6
-        t1 = t0 + deltat
-        return u1,t1
-    
-    # implement midpoint method
-    def midpoint(u0,t0,deltat):
-        t1 = t0+0.5*deltat
-        u1 = u0 + 0.5*deltat*func(u0,t0)
-        k = func(u1,t1)
-        t2 = t0 + deltat
-        u2 = u0 + deltat*k
-        return u2,t2
+    try:
+        # use solve_to function in ode_solver library. The solution contains solution at t = tn
+        z = ode_solver.solve_to(func,guess[:-1],0,guess[-1],method,0.001)
+        print(z[0])
+        return [func(guess[:-1],0)[0],z[0][0]-guess[0],z[0][1]-guess[1]]
     
     
-    def numerical_shooting(method,s):
-        u_0 = s[:-1]
-        T = s[-1] 
-        t_0 = t0
-        #dxdt = func(u_0,t_0)
-        if method == 'euler':
-            for i in range(int(T/deltat)):
-                u_0,t_0 = euler_step(u_0,t_0,deltat)
-        elif method == 'RK4':
-            for i in range(int(T/deltat)):
-                u_0,t_0 = RK4(u_0,t_0,deltat)
-        elif method == 'midpoint':
-            for i in range(int(T/deltat)):
-                u_0,t_0 = midpoint(u_0,t_0,deltat)
-        else:
-            print('Wrong input method')
-        
-        return np.append(s[:-1]-np.array(u_0),func(u_0,t_0)[0])
-    
+    except:
+        print('Wrong input')
+        #return [] 
     
 
-    # use fsolve in scipy, the pros are this is an existing function that is well-built to find roots,
-    # the cons are we need give initial guess and it may not converge and it may give reuslt that is wrong.like T less than 0   
-    def solve(guess):
-        result = root(lambda s: numerical_shooting(method,s),(guess))
-        if result.success:
-            result1 = result
-        else:
-            print('failed to converge')
-            print(result.Msg)
-        return result1
+     
+def solve(func,guess):
+     # use root in scipy, the pros are this is an existing function that is well-built to find roots,
+    # the cons are we need give initial guess and it may not converge and it may give reuslt that is wrong.like T less than 0 
     
-    u0 = u0
-    t = t0
-    deltat = 1e-3  # set deltat equals 1e-6, which will give very high accuracy of RK4 and euler 
-    soln = []
+    result = root(lambda s: shooting(func,s),guess)
+    if result.success:
+        result1 = result
+    else:
+        print('failed to converge')
+        print(result.Msg)
+    return result1
+    
+#%%    
+    
+def func1(u,t):
+    x,y = u
+    dxdt = y
+    dydt = -x
+    return np.array([dxdt,dydt])
 
-    if method == 'euler':
-        for i in range(int((tn-t0)/deltat)):
-            u0,t0 = euler_step(u0,t0,deltat)
-            soln.append(u0[0])
-    elif method == 'RK4':
-        for i in range(int((tn-t0)/deltat)):
-            u0,t0 = RK4(u0,t0,deltat)
-            soln.append(u0[0])
-    elif method == 'midpoint':
-        for i in range(int((tn-t0)/deltat)):
-            u0,t0 = midpoint(u0,t0,deltat)
-            soln.append(u0[0])
     
-    result = solve(guess)
-    test = np.allclose(numerical_shooting(method,result.x),0,1e-3)
+#%%   
     
+result = solve(func1,(2,0,6))
+test = np.allclose(shooting(func1,result.x),0,1e-5)
+print(shooting(func1,result.x))
+print(result.x)
+print(test)    
     #t = np.linspace(t0,tn,int((tn-t0)/deltat))
     #plt.plot(t,soln)
-    t_span = np.linspace(t,tn,int((tn-t)/deltat))
+    #t_span = np.linspace(t,tn,int((tn-t)/deltat))
 
-    plt.plot(t_span,soln)       
+    #plt.plot(t_span,soln)       
       
-    return [u0,result.x,test]
+    #return [u0,result.x,test]
 
 
 #%%

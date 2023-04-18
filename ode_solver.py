@@ -192,13 +192,13 @@ def solve_to(func,x1,t1,t2,method,deltat_max):
     elif method == 'RK4':
         for i in range(0,int(num_steps)):
             x1,t1 = RK4(func,x1,t1,deltat)
-            x1 = np.reshape(x1,(-1,1))
-            soln = np.column_stack((soln,x1))
+            xr = np.reshape(x1,(-1,1))
+            soln = np.column_stack((soln,xr))
     elif method == 'midpoint':
         for i in range(0,int(num_steps)):
             x1,t1 = midpoint(func,x1,t1,deltat)
-            x1 = np.reshape(x1,(-1,1))
-            soln = np.column_stack((soln,x1))
+            xr = np.reshape(x1,(-1,1))
+            soln = np.column_stack((soln,xr))
     else:
         x1 = 'nan'
         method = 'nan'
@@ -207,7 +207,7 @@ def solve_to(func,x1,t1,t2,method,deltat_max):
     #soln.append(str(x1))
     #soln.append(str(t2))
     #soln.append(method)
-    return [soln,t]
+    return [x1,soln,t]
 
 
 #%%
@@ -226,12 +226,12 @@ if __name__=='__main__':
         dydt = -x
         return np.array([dxdt,dydt])
 
-    z = solve_to(func,1,0,1,'euler',0.001)
-    print('The solution of ode at t = '+ str(z[1][-1]) + ' is ' + str(z[0][0][-1]))
+    z = solve_to(func,1,0,1,'RK4',0.001)
+    print('The solution of ode at t = '+ str(z[2][-1]) + ' is ' + str(z[0]))
 
 #%%
 
-    '''Error of RK4 and Euler method against stepsize deltat'''
+    #Error of RK4 and Euler method against stepsize deltat
     
     error_euler = []
     error_RK4 = []
@@ -308,11 +308,11 @@ if __name__=='__main__':
     
     # plot the ode solution x against t
     plt.figure()
-    plt.plot(z1[1], z1[0][0], 'b',label='Euler(deltat=0.1)')
-    plt.plot(z2[1], z2[0][0], 'k',label='RK4(deltat=0.1)')
-    plt.plot(z3[1], z3[0][0], 'g-',label='Euler(deltat=0.01)')
-    plt.plot(z4[1], z4[0][0], 'y-',label='RK4(deltat=0.01)')
-    plt.plot(z4[1],np.sin(z4[1])+np.cos(z4[1]),'r',label='real solution')
+    plt.plot(z1[2], z1[1][0], 'b',label='Euler(deltat=0.1)')
+    plt.plot(z2[2], z2[1][0], 'k',label='RK4(deltat=0.1)')
+    plt.plot(z3[2], z3[1][0], 'g-',label='Euler(deltat=0.01)')
+    plt.plot(z4[2], z4[1][0], 'y-',label='RK4(deltat=0.01)')
+    plt.plot(z4[2],np.sin(z4[2])+np.cos(z4[2]),'r',label='real solution')
     plt.ylabel('x')
     plt.xlabel('t')
     plt.legend()
@@ -322,5 +322,5 @@ if __name__=='__main__':
 
     # plot x against t and y against t in time interval [0,10]
     z5 = solve_to(func1,(1,1),0,10,'RK4',0.01)
-    plt.plot(z5[1], z5[0][0], z5[1], z5[0][1],label='RK4(deltat=0.01)')
+    plt.plot(z5[2], z5[1][0], z5[2], z5[1][1],label='RK4(deltat=0.01)')
 
