@@ -172,32 +172,39 @@ def solve_to(func,x1,t1,t2,method,deltat_max):
         solution to the ode at t= t2
 
     """
-    soln = []
+    soln = np.reshape(x1,(-1,1))
     deltat = t2-t1
     # change the deltat until it is smaller than deltat_max
     while deltat >= deltat_max:
         deltat = deltat/10 
     num_steps = (t2-t1)/deltat
+    t = np.linspace(t1,t2,int(num_steps))
     
     # method defines the method to solve ode
     if method == 'euler':
         for i in range(0,int(num_steps)):
             x1,t1 = euler(func,x1,t1,deltat)
+            xr= np.reshape(x1,(-1,1))
+            soln = np.column_stack((soln,xr))
     elif method == 'RK4':
         for i in range(0,int(num_steps)):
             x1,t1 = RK4(func,x1,t1,deltat)
+            x1 = np.reshape(x1,(-1,1))
+            soln = np.column_stack((soln,x1))
     elif method == 'midpoint':
         for i in range(0,int(num_steps)):
             x1,t1 = midpoint(func,x1,t1,deltat)
+            x1 = np.reshape(x1,(-1,1))
+            soln = np.column_stack((soln,x1))
     else:
         x1 = 'nan'
         method = 'nan'
         print('Wrong input method,please try again')
     
-    soln.append(str(x1))
-    soln.append(str(t2))
-    soln.append(method)
-    return soln
+    #soln.append(str(x1))
+    #soln.append(str(t2))
+    #soln.append(method)
+    return [soln,t]
 
 
 #%%
@@ -216,8 +223,8 @@ if __name__=='__main__':
         dydt = -x
         return np.array([dxdt,dydt])
 
-    z = solve_to(func,1,0,1,'RK4',0.001)
-    print('The solution of ode at t = '+ z[1] +' using ' + z[2]+' method is '+ z[0])
+    z = solve_to(func,1,0,1,'euler',0.001)
+    print('The solution of ode at t = '+ str(z[1][-1]) + ' is ' + str(z[0][0][-1]))
 
 #%%
 
@@ -271,7 +278,7 @@ if __name__=='__main__':
     t1 = time.time()
     for i in range(0,int(1/0.01)):
         x0,t0 = euler(func1,x0,t0,0.01)
-        Time1 = time.time()-t1
+    Time1 = time.time()-t1
     print('The running time of Euler method solving ode with an error of 0.003 is ' + str(Time1))
 
 
@@ -281,7 +288,7 @@ if __name__=='__main__':
     t2 = time.time()
     for i in range(0,int(1/0.5)):
         x0,t0 = RK4(func1,x0,t0,0.5)
-        Time2 = time.time()-t2
+    Time2 = time.time()-t2
     print('The running time of RK4 method solving ode with an error of 0.003 is ' + str(Time2))
         
     #%%
