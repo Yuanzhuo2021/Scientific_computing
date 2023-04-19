@@ -64,10 +64,10 @@ def shooting(func,s):
     method = 'RK4'
     
     # use solve_to function in ode_solver library. The solution contains solution at t = tn
-    z = ode_solver.solve_to(func,(1,1),0,s,method,0.01)
-    z1 = ode_solver.solve_to(func,(1,1),0, 2*s,method,0.01)
+    z = ode_solver.solve_to(func,s[:-1],0,s[-1],method,0.01)
+    #z1 = ode_solver.solve_to(func,s[:-1],0,2*s[-1],method,0.01)
     print(z[0])
-    return [z1[0][0]-z[0][0]]
+    return [s[0]-z[0][0],s[1]-z[0][1],func(s[:-1],0)[0]] # z[0][0] is x, z[0][1] is y
     
     
     #except:
@@ -79,7 +79,7 @@ def shooting(func,s):
 def solve(func,guess):
      # use root in scipy, the pros are this is an existing function that is well-built to find roots,
     # the cons are we need give initial guess and it may not converge and it may give reuslt that is wrong.like T less than 0 
-    result = root(lambda s: shooting(func,s),guess,method = 'krylov')
+    result = root(lambda s: shooting(func,s),guess)
     if result.success:
         result1 = result
     else:
@@ -97,7 +97,7 @@ def func1(u,t):
 
       
     
-result = solve(func1,6)
+result = solve(func1,(1,1,6))
 test = np.allclose(shooting(func1,result.x),0,1e-5)
 print(shooting(func1,result.x))
 print(shooting(func1,result.x))
