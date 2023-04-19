@@ -10,27 +10,30 @@ from scipy.optimize import fsolve,root
 import matplotlib.pyplot as plt
 
 
-def algebraic_cubic(u):
-    x,c = u
-    return x**3 - x + c
-
 def continuation(func,rang,guess):
     """
-    
+    This function is used natural parameter continuation method, get the solution depending on 
+    parameter c
 
     Parameters
     ----------
-    func : TYPE
-        DESCRIPTION.
-    rang : TYPE
-        DESCRIPTION.
-    guess : TYPE
-        DESCRIPTION.
+    func : callable
+        Equation to solve
+        
+        E.g.
+        def algebraic_cubic(u):
+            x,c = u
+            return x**3 - x + c
+        
+    rang : numpy.array
+        the range of parameter c
+    guess : int/numpy.array
+        Initial guess of the solution
 
     Returns
     -------
-    list
-        DESCRIPTION.
+    Return a list containing values of parameters and corresponding solutions
+        
 
     """
     S = 1000
@@ -38,6 +41,7 @@ def continuation(func,rang,guess):
     C = []
     solution = []
     for i in range(S):
+        # simply add a stepsize to c 
         c = rang[0] + step*(i)
         result = root(lambda x: func((x,c)),guess)
         if result.success:
@@ -50,73 +54,36 @@ def continuation(func,rang,guess):
             break
     return [solution,C]
 
-z = continuation(algebraic_cubic,(-2,2),2)
-
-plt.plot(z[1],z[0])
-plt.xlabel('Parameter')
-plt.ylabel('Solution')
 
 
-#%%
-
-
-
-S =1000
-deltat = 0.01
-u1 = []
-u2 = []
-u0 = (1,1)
-beta = 0
-
-def Hopf_bifurcation(u,beta):
-    u1,u2 = u
-    du1dt = beta*u1-u2 - u1*(u1**2+u2**2)
-    du2dt = u1+beta*u2 - u2*(u1**2+u2**2)
-    return np.array([du1dt,du2dt])
-
-def euler_step(u0,beta,deltat):
-    u1 = u0+deltat*Hopf_bifurcation(u0,beta)
-    beta = beta + 2/S
-    return u1,beta
-
-for i in range(S):
-    u0,t0 = euler_step(u0,beta,deltat)
-    u1.append(u0[0])
-    u2.append(u0[1])
-
-t = np.linspace(0,1,S)
-beta = np.linspace(0,2,S)
-print(t)
-print(u1)
-plt.figure()
-plt.plot(beta,u1,beta,u2)
-       
-
-#%%
-
-
-# delta is the secant of state vector
 
 def psuedo_arclength_continuation(func,rang,guess):
     """
-    
+    This function is used to find solutions of an equation or systems of equations 
+    that depend on a parameter c
 
     Parameters
     ----------
-    func : A function 
-        DESCRIPTION.
-    rang : TYPE
-        DESCRIPTION.
-    guess : TYPE
-        DESCRIPTION.
+    func : callable
+        ode function or equation
+        
+        Example:
+        def algebraic_cubic(u):
+            x,c = u
+            return x**3 - x + c
+        
+    rang : numpy.array
+        the range of parameter c
+    guess : numpy.array/int
+        Intial guess of the solution
 
     Returns
     -------
-    list
-        DESCRIPTION.
+    Return a list with the values of the parameter and corresponding solutions
 
     """
     
+    # use natural parameter continuation generate first two solutions 
     z = continuation(func,rang,guess)
     if len(z[0])>=2 and len(z[1])>=2:
         # get the first two solns using natural parameter continuation
@@ -128,11 +95,11 @@ def psuedo_arclength_continuation(func,rang,guess):
         soln = [z[0][0],z[0][1]]
         param = [z[1][0],z[1][1]]
         
+        # define an extra pseudo arclenth equation which is need to be solved
         def pseudo_equation(u,u2):
             return [np.dot((u-u2),delta),func(u)]
         
         for i in range(1000):
-            
             delta = (u1-u0)
             u2 = u1 + delta # estimated value
             true_value = root(lambda u: pseudo_equation(u,u2),u2) # true value of u2
@@ -148,9 +115,68 @@ def psuedo_arclength_continuation(func,rang,guess):
                 break
     else:
         print('Converges fail, please choose a new guess')
-    return [param,soln]
+    return [soln,param]
 
-zz = psuedo_arclength_continuation(algebraic_cubic,(-2,2),2)
-print(zz[0])
+#%%
 
-plt.plot(zz[0],zz[1])
+if __name__ == '__main__':
+    
+    # define a equation
+    def algebraic_cubic(u):
+        x,c = u
+        return x**3 - x + c
+    
+    #solve equation using natural continuation
+    z = continuation(algebraic_cubic,(-2,2),2)
+    plt.plot(z[1],z[0])
+    plt.xlabel('Parameter')
+    plt.ylabel('Solution')
+    
+    # solve using pseudo-arclength continuation
+    zz = psuedo_arclength_continuation(algebraic_cubic,(-2,2),2)
+    #print(zz[0])
+    plt.figure()
+    plt.plot(zz[1],zz[0])
+    plt.xlabel('Parameter')
+    plt.ylabel('Solution')
+
+#%%
+
+
+
+    S =1000
+    deltat = 0.01
+    u1 = []
+    u2 = []
+    u0 = (1,1)
+    beta = 0
+
+    def Hopf_bifurcation(u,beta):
+        u1,u2 = u
+        du1dt = beta*u1-u2 - u1*(u1**2+u2**2)
+        du2dt = u1+beta*u2 - u2*(u1**2+u2**2)
+        return np.array([du1dt,du2dt])
+
+    def euler_step(u0,beta,deltat):
+        u1 = u0+deltat*Hopf_bifurcation(u0,beta)
+        beta = beta + 2/S
+        return u1,beta
+
+    for i in range(S):
+        u0,t0 = euler_step(u0,beta,deltat)
+        u1.append(u0[0])
+        u2.append(u0[1])
+
+    t = np.linspace(0,1,S)
+    beta = np.linspace(0,2,S)
+    #print(t)
+    #print(u1)
+    plt.figure()
+    plt.plot(beta,u1,beta,u2)
+    plt.xlabel('Parameter beta')
+    plt.ylabel('Solution')
+       
+
+#%%
+
+
