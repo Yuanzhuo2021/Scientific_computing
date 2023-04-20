@@ -64,7 +64,7 @@ def shooting(func,s):
     method = 'RK4'
     
     # use solve_to function in ode_solver library. The solution contains solution at t = tn
-    z = ode_solver.solve_to(func,s[:-1],0,s[-1],method,0.01)
+    z = ode_solver.solve_to(func,s[:-1],0,s[-1],method,0.001)
     #z1 = ode_solver.solve_to(func,s[:-1],0,2*s[-1],method,0.01)
     print(z[0])
     return [s[0]-z[0][0],s[1]-z[0][1],func(s[:-1],0)[0]] # z[0][0] is x, z[0][1] is y
@@ -86,6 +86,36 @@ def solve(func,guess):
         print('failed to converge')
         print(result.Msg)
     return result1
+
+
+#%%
+
+
+
+import math
+from scipy.integrate import odeint
+
+
+def pend(y, t):
+    theta, omega = y
+    dydt = [omega, -theta]
+    return dydt
+
+
+y0 = [1,0]
+
+t = np.linspace(0, 10, 101)
+sol = odeint(pend, y0, t)
+
+print(sol)
+
+import matplotlib.pyplot as plt
+plt.plot(t, sol[:, 0], 'b', label='theta(t)')
+plt.plot(t, sol[:, 1], 'g', label='omega(t)')
+plt.legend(loc='best')
+plt.xlabel('t')
+plt.grid()
+plt.show()
     
 #%%    
     
@@ -95,8 +125,10 @@ def func1(u,t):
     dydt = -x
     return np.array([dxdt,dydt])
 
-      
-    
+z = ode_solver.solve_to(func1,(1,1),0,2*math.pi,'RK4',0.0001)      
+print(z[0])
+
+#%%   
 result = solve(func1,(1,1,6))
 test = np.allclose(shooting(func1,result.x),0,1e-5)
 print(shooting(func1,result.x))

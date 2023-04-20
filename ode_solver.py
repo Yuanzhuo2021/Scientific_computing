@@ -319,8 +319,8 @@ if __name__=='__main__':
     plt.title('solution to second order ode using different stepsizes')
     plt.show()
 
-
+#%%
     # plot x against t and y against t in time interval [0,10]
-    z5 = solve_to(func1,(1,1),0,10,'RK4',0.01)
+    z5 = solve_to(func1,(0,0),0,10,'RK4',0.01)
     plt.plot(z5[2], z5[1][0], z5[2], z5[1][1],label='RK4(deltat=0.01)')
 

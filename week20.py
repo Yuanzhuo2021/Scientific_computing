@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import math
 
-%matplotlib notebook
+#%matplotlib notebook
 
 
 C = 0.1 # C < 0.5 to make sure the explicit euler method is stable
