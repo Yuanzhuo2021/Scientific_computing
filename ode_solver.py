@@ -320,7 +320,16 @@ if __name__=='__main__':
     plt.show()
 
 #%%
+
+    def predator_prey(u,t0):
+        a = 1
+        b = 0.1
+        d = 0.1
+        du1dt = u[0]*(1-u[0])-(a*u[0]*u[1])/(d+u[0])
+        du2dt = b*u[1]*(1-u[1]/u[0])
+        return np.array([du1dt,du2dt])
+    
     # plot x against t and y against t in time interval [0,10]
-    z5 = solve_to(func1,(0,0),0,10,'RK4',0.01)
+    z5 = solve_to(predator_prey,(0.27015621,0.27015621),0,100,'RK4',0.01)
     plt.plot(z5[2], z5[1][0], z5[2], z5[1][1],label='RK4(deltat=0.01)')
 

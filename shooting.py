@@ -90,7 +90,12 @@ def solve(func,guess):
 
 #%%
 
+s = (0,0,2*math.pi)
+z = ode_solver.solve_to(func1,s[:-1],0,s[-1],'RK4',0.001)
 
+print(func1(s[:-1],0)[0])
+print(z)
+#%%
 
 import math
 from scipy.integrate import odeint
@@ -101,8 +106,16 @@ def pend(y, t):
     dydt = [omega, -theta]
     return dydt
 
+def predator_prey(u,t0):
+        a = 1
+        b = 0.1
+        d = 0.1
+        du1dt = u[0]*(1-u[1])-(a*u[0]*u[1])/(d+u[0])
+        du2dt = b*u[1]*(1-u[1]/u[0])
+        return np.array([du1dt,du2dt])
+    
 
-y0 = [1,0]
+y0 = [0,0]
 
 t = np.linspace(0, 10, 101)
 sol = odeint(pend, y0, t)
@@ -125,11 +138,11 @@ def func1(u,t):
     dydt = -x
     return np.array([dxdt,dydt])
 
-z = ode_solver.solve_to(func1,(1,1),0,2*math.pi,'RK4',0.0001)      
+z = ode_solver.solve_to(func1,(1,0),0,2*math.pi,'RK4',0.001)      
 print(z[0])
 
 #%%   
-result = solve(func1,(1,1,6))
+result = solve(func1,(10,0,6))
 test = np.allclose(shooting(func1,result.x),0,1e-5)
 print(shooting(func1,result.x))
 print(shooting(func1,result.x))
@@ -173,7 +186,7 @@ def predator_prey(u,t0):
     du2dt = b*u[1]*(1-u[1]/u[0])
     return np.array([du1dt,du2dt])
 
-z1 = shooting_ode_solver(predator_prey,(1,1),0,1,'euler',(0.3,0.3,10))
+z1 = solve(predator_prey,(0.3,0.3,10))
 print(z1)
 
 #%%
