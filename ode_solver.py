@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import time
-
+import shooting
 
 def euler(func,u0,t0,deltat):
     """
