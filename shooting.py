@@ -69,7 +69,6 @@ def shooting(func,s):
     print(z[0])
     return [s[0]-z[0][0],s[1]-z[0][1],func(s[:-1],0)[0]] # z[0][0] is x, z[0][1] is y
     
-    
     #except:
       #  print('Wrong input')
         #return [] 

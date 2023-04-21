@@ -27,49 +27,61 @@ def explicit_euler(a,b,D,alpha,beta,t):
     #print(x)
     #fx = np.sin((math.pi*(x-a)/(b-a)))
     
-    fx = np.zeros(len(N_space))
+    x = np.linspace(a,b,N+1)
+    fx = 4*x*(3-x)
+    
     
     u = np.zeros((int(N_time)+1,N_space+1))
     
     for i in range(0,N_space):
         u[0,i] = fx[i]
+        
+    for k in range(0,int(N_time)):
+        u[k,0] = alpha
+        u[k,N_space] = beta 
 
     print(x)
     print(N_time)
     print(u)
     #The outer for loop increments over time (increases n )
-    for n in range(int(n_tsteps)):
+    for n in range(int(N_time)):
     
-        for i  in range(N-1):
+        for i  in range(N_space-1):
         
             if i == 0:
-                u[n+1,0] = u[n,0] + C* (u[n,1]-2*u[n,0]+alpha)
-            elif i > 0 and i < N-2:
-                u[n+1,i] = u[n,i] + C* (u[n,i+1]-2*u[n,i]+u[n,i-1])
+                u[n+1,1] = u[n,1] + C* (u[n,2]-2*u[n,1]+alpha)
+            elif i > 0 and i < N_space:
+                u[n+1,i+1] = u[n,i+1] + C* (u[n,i+2]-2*u[n,i+1]+u[n,i])
             else:
-                u[n+1,N-2] = u[n,N-2] + C* (beta -2*u[n,N-2]+u[n,N-3])
-    
-    return u
+                u[n+1,N_space-1] = u[n,N_space-1] + C* (beta -2*u[n,N-1]+u[n,N_space-2])
     
     
-u = explicit_euler(0,1,0.5,1,0,1)    
-print(u)   
+    #fig,ax = plt.subplots()
 
+    #ax.set_xlabel('x')
+    #ax.set_ylabel('u(x,t)')
+
+    #line, = ax.plot(x,u[0,:])
+
+    #def animate(i):
+        #line.set_data((x,u[i,:]))
+      #  return line
+
+    #ani = animation.FuncAnimation(fig,animate,frames=int(N_time),blit=False,interval = 100)
+   # plt.show()
+    
+    return [x,u,N_time]
+
+z = explicit_euler(0,3,1,0,0,3)    
+print(z[1])   
+print(len(z[1]))
+
+plt.plot(z[0],z[1][0,:])
+plt.plot(z[0],z[1][100,:])
+plt.plot(z[0],z[1][200,:])
 
 #%%
-fig,ax = plt.subplots()
-ax.set_ylim(0,1)
-ax.set_xlabel('x')
-ax.set_ylabel('u(x,t)')
 
-line, = ax.plot(x,u[0,:])
-
-def animate(i):
-    line.set_data((x,u[i,:]))
-    return line
-
-ani = animation.FuncAnimation(fig,animate,frames=int(100),blit=True,interval = 100)
-plt.show()
 
 #%%
 plt.figure()
