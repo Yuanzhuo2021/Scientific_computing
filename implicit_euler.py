@@ -36,7 +36,7 @@ def implicit_euler(a,b,alpha,beta,D,t):
     """
     
     # set number of steps of space and time
-    N_space = 20
+    N_space = 200
     N_time = 1000
     
     #step size
@@ -48,6 +48,8 @@ def implicit_euler(a,b,alpha,beta,D,t):
     # identity matrix
     I = np.identity(N_space-1)
     
+    #stepwise x values
+    x = np.linspace(a,b,N_space+1)
 
     # use numpy to solve the system of equations. There are N-1 equations as there are N-1 unknowns.
 
@@ -90,4 +92,16 @@ def implicit_euler(a,b,alpha,beta,D,t):
     U = np.hstack((alpha*np.ones((N_time,1)),U))
     print(U)
     
-    return U
+    return [x,U]
+
+
+z = implicit_euler(0,1,1,0,0.5,1)
+
+
+plt.plot(z[0],z[1][0])
+plt.plot(z[0],z[1][200])
+plt.plot(z[0],z[1][400])
+plt.plot(z[0],z[1][999])
+plt.xlabel('x')
+plt.ylabel('u(x,t)')
+plt.legend(['t=0','t=0.2','t=0.4','t=1'])
