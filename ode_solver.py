@@ -10,7 +10,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import time
-import shooting
+#import shooting
+import cProfile
+import timeit
 
 def euler(func,u0,t0,deltat):
     """
@@ -274,7 +276,9 @@ if __name__=='__main__':
     #%%
     #print the error,  we see that the error is the same around 0.001 when deltat is 0.01 for Euler method and 0.5 for RK4. Calculate the run time
 
-
+    pr = cProfile.Profile()
+    pr.enable()
+    
     #calculate the run time for euler 
     x0 = (1,1)
     t0 = 0
@@ -282,17 +286,31 @@ if __name__=='__main__':
     for i in range(0,int(1/0.01)):
         x0,t0 = euler(func1,x0,t0,0.01)
     Time1 = time.time()-t1
+    
     print('The running time of Euler method solving ode with an error of 0.003 is ' + str(Time1))
+    pr.disable()
+    pr.print_stats(sort='cumtime')
+    
+    
 
 
     #calculate the run time for RK4
+    pr = cProfile.Profile()
+    pr.enable()
+    
     x0 = (1,1)
     t0 = 0
     t2 = time.time()
     for i in range(0,int(1/0.5)):
-        x0,t0 = RK4(func1,x0,t0,0.5)
+        x0,t0 = euler(func1,x0,t0,0.5)
     Time2 = time.time()-t2
+    
     print('The running time of RK4 method solving ode with an error of 0.003 is ' + str(Time2))
+    pr.disable()
+    pr.print_stats(sort='cumtime')
+    
+    
+    
         
     #%%
     
@@ -303,8 +321,6 @@ if __name__=='__main__':
     z2 = solve_to(func1,(1,1),0,1,'RK4',0.1)
     z3 = solve_to(func1,(1,1),0,1,'euler',0.01)
     z4 = solve_to(func1,(1,1),0,1,'RK4',0.01)
-    
-    print(z1)
     
     # plot the ode solution x against t
     plt.figure()
