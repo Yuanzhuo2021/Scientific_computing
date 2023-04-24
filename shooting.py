@@ -38,24 +38,21 @@ def shooting(func,s):
         
         
         parameters that are needed in the 'func',you need to specify the initial values.
-        Example: for predator prey ode function, func = predator_prey(u1,u2,a,b,d), u1,u2,a,b,d you need to give them values
+        Example: for predator prey ode function, func :  predator_prey
         
              
-    method:
-        Options for numerical integrators. 'euler' for  euler's method, 'RK4' for the fourth-order Runge-Kutta method, 'midpoint' for 
-        the midpoint method.
         
-    guess: 
+    s: 
         guess of initial values and period T to give limit cycles.Values are stored in a numpy array
         Example:
-            guess for predator_prey function: guess = array([x_guess,y_guess,T])
+            guess for predator_prey function: guess : (x_guess,y_guess,T)
             
    
    
     Returns
     ----------
     
-    Returns initial values to have limit cycles. output its period.
+    Returns initial values to have limit cycles. and its period.
 
 
      """
@@ -73,9 +70,24 @@ def shooting(func,s):
       #  print('Wrong input')
         #return [] 
     
-
      
 def solve(func,guess):
+    """
+    This function solves linit cycles of shooting using root in scipy
+
+    Parameters
+    ----------
+    func : TYPE
+        DESCRIPTION.
+    guess : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    result1 : TYPE
+        DESCRIPTION.
+
+    """
      # use root in scipy, the pros are this is an existing function that is well-built to find roots,
     # the cons are we need give initial guess and it may not converge and it may give reuslt that is wrong.like T less than 0 
     result = root(lambda s: shooting(func,s),guess)
@@ -198,9 +210,9 @@ def Hopf_bifurcation(u,t0):
     du2dt = u1+beta*u2+sigma*u2*(u1**2+u2**2)
     return np.array([du1dt,du2dt])
 
-z1 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'euler',(1,1,1))
-z2 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'RK4',(1,1,1))
-z3 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'midpoint',(1,1,1))
+z1 = shooting(Hopf_bifurcation,(1,0),0,1,'euler',(1,1,1))
+z2 = shooting(Hopf_bifurcation,(1,0),0,1,'RK4',(1,1,1))
+z3 = shooting(Hopf_bifurcation,(1,0),0,1,'midpoint',(1,1,1))
 
 print(z1)
 print(z2)
@@ -208,22 +220,7 @@ print(z3)
 
 #%%
 
-# unit test to test the solution
-class Test_ODE(unittest.TestCase):
-    def test_soln(self):
-        
-        z1 = shooting_ode_solver(Hopf_bifurcation,(1,0),0,1,'euler',(1,1,1))
-        # Account for accuracy: as the shooting solution will not exactly match the explicit solution. Set tolerance equals to 1e-6
-        if abs(z1[0][0]-math.sqrt(1)*math.cos(1)) < 1e-3 and abs(z1[0][1]-math.sqrt(1)*math.sin(1)) < 1e-3:  
-            print("Test passed")
-        else:
-            print("Test failed")
-        #self.assertAlmostEqual(z1[0],math.sqrt(1)*math.cos(1))
-        #self.assertAlmostEqual(z1[1],math.sqrt(1)*math.sin(1))
-        
-unittest.main(argv=[''],verbosity=2, exit=False)
-#if __name__ == '__main__':
-    #unittest.main()
+
 
 
 

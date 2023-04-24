@@ -104,7 +104,7 @@ def RK4(func,u0,t0,deltat):
     
 
 # implement midpoint method
-def midpoint(u0,t0,deltat):
+def midpoint(func,u0,t0,deltat):
     """
     single step of midpoint method works for any dimension of ode
     
@@ -275,7 +275,9 @@ if __name__=='__main__':
     #print(error_RK4)
     #%%
     #print the error,  we see that the error is the same around 0.001 when deltat is 0.01 for Euler method and 0.5 for RK4. Calculate the run time
-
+    
+    
+    # use cprofile and time.time() to reord the run time
     pr = cProfile.Profile()
     pr.enable()
     
