@@ -10,7 +10,7 @@ import matplotlib.animation as animation
 import math
 
 #%matplotlib notebook
-def explicit_euler(a,b,D,alpha,beta,t):
+def explicit_euler(a,b,alpha,beta,D,t,method):
     """
     This function uses explicit euler to solve pde
 
@@ -20,14 +20,16 @@ def explicit_euler(a,b,D,alpha,beta,t):
         Left boundary 
     b : int
         Right boundary 
-    D : float/int
-        Parameter in front of the 
     alpha : float
         Left boundary condition e.g. u(a,0) = alpha 
     beta : float
         Right boundary condition e.g. u(b,0) = beta
+    D : float/int
+        Parameter of the diffusion term 
     t : int
-        Time solve to
+        end time solve to
+    method:string
+        user choose explicit method or RK4 to solve pde
         
     Returns
     -------
@@ -63,30 +65,44 @@ def explicit_euler(a,b,D,alpha,beta,t):
     for k in range(0,int(N_time)+1):
         u[k,0] = alpha
         u[k,N_space] = beta 
-      
-    #The outer for loop increments over time (increases n )
-    for n in range(int(N_time)):
         
-        # the inner for loop increments over space
-        for i in range(N_space-1):
-        
-            if i == 0:
-                u[n+1,1] = u[n,1] + C* (u[n,2]-2*u[n,1]+alpha)
-            elif i > 0 and i < N_space-2:
+    # use explicit euler
+    if method == 'euler':
+        #The outer for loop increments over time (increases n )
+        for n in range(int(N_time)):
+            # the inner for loop increments over space
+            for i in range(N_space-1):
                 u[n+1,i+1] = u[n,i+1] + C* (u[n,i+2]-2*u[n,i+1]+u[n,i])
-            else:
-                u[n+1,N_space-1] = u[n,N_space-1] + C* (beta -2*u[n,N_space-1]+u[n,N_space-2])
+             
+    # Use RK4               
+    else:
+        #The outer for loop increments over time (increases n )
+        for n in range(int(N_time)):
+            # the inner for loop increments over space
+            for i in range(N_space-1):
+                 k1 = C*(u[n,i+2]-2*u[n,i+1]+u[n,i])
+                 k2 = C*(u[n,i+2]-2*u[n,i+1]+u[n,i]) + dt*D*k1/2
+                 k3 = C*(u[n,i+2]-2*u[n,i+1]+u[n,i]) + dt*D*k2/2
+                 k4 = C*(u[n,i+2]-2*u[n,i+1]+u[n,i]) + dt*D*k3
+                 u[n+1,i+1] = u[n,i+1] + (k1 + 2*k2 + 2*k3 + k4)/6
     
     return [x,u,N_time]
 
 #%%
 if __name__ == '__main__':
     
+    a = 0
+    b = 1
+    alpha = 0
+    beta = 0
+    D = 0.5
+    t = 1
+    
     #solve linear diffusion equation
-    z = explicit_euler(0,1,0.5,0,0,1)    
+    z = explicit_euler(0,1,0,0,0.5,1,'euler')    
     print(z[1])
 
-    # plot 
+   
     plt.plot(z[0],z[1][int(z[2]/10),:])
     plt.plot(z[0],z[1][int(z[2]/5),:])
     plt.plot(z[0],z[1][int(z[2]/2),:])
@@ -114,13 +130,13 @@ if __name__ == '__main__':
 
 #%%
     # test the result
-    plt.figure()
-    plt.plot(x,u[4,:])
+    
+    x = z[0]
+    # real solution
+    f = np.exp(-D*((math.pi)**2)*(1)/((b-a)**2))*np.sin(math.pi*(x-a)/(b-a))    
+    
+    test = np.allclose(f,z[1][-1],1e-2)
+    print(test)
 
-    t =dt* np.arange(n_tsteps) 
-    print(t)
 
-    f = np.exp(-D*((math.pi)**2)*(dt*4)/(b-a)**2)*np.sin(math.pi*(x-a)/(b-a))
-
-    plt.plot(x,f(x))
 

@@ -19,7 +19,7 @@ def shooting_func(func,s):
     ---------
     Func:
         An n-th order ordinary differential equation we are solving. It has to be written in a system of n first-order odes.Also,the parameters should
-        be included in the 'func'.The func returns a numpy array with u1,u2,u3...un
+        be included in the 'func'.The func returns a numpy array with du1/dx,du2/dt,du3/dt...dun/dt
         
         Example: A predator_prey ode function can be written as below:
         
