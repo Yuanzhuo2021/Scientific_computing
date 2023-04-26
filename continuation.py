@@ -12,7 +12,7 @@ from scipy.optimize import fsolve,root
 import matplotlib.pyplot as plt
 
 
-def continuation(func,rang,guess):
+def natural(func,rang,guess):
     """
     This function is used natural parameter continuation method, get the solution depending on 
     parameter c
@@ -34,7 +34,7 @@ def continuation(func,rang,guess):
 
     Returns
     -------
-    Return a list containing values of parameters and corresponding solutions
+    Return a list containing values of solutions and corresponding parameters
         
 
     """
@@ -59,7 +59,7 @@ def continuation(func,rang,guess):
 
 
 
-def psuedo_arclength_continuation(func,rang,guess):
+def psuedo_arclength(func,rang,guess):
     """
     This function is used to find solutions of an equation or systems of equations 
     that depend on a parameter c
@@ -86,7 +86,7 @@ def psuedo_arclength_continuation(func,rang,guess):
     """
     
     # use natural parameter continuation generate first two solutions 
-    z = continuation(func,rang,guess)
+    z = natural(func,rang,guess)
     if len(z[0])>=2 and len(z[1])>=2:
         # get the first two solns using natural parameter continuation
         u0 = np.array([z[0][0],z[1][0]])
@@ -98,13 +98,13 @@ def psuedo_arclength_continuation(func,rang,guess):
         param = [z[1][0],z[1][1]]
         
         # define an extra pseudo arclenth equation which is need to be solved
-        def pseudo_equation(u,u2):
+        def psuedo_equation(u,u2):
             return [np.dot((u-u2),delta),func(u)]
         
         for i in range(1000):
             delta = (u1-u0)
             u2 = u1 + delta # estimated value
-            true_value = root(lambda u: pseudo_equation(u,u2),u2) # true value of u2
+            true_value = root(lambda u: psuedo_equation(u,u2),u2) # true value of u2
 
             if true_value.success:
                 soln.append(true_value.x[0])
@@ -129,13 +129,13 @@ if __name__ == '__main__':
         return x**3 - x + c
     
     #solve equation using natural continuation
-    z = continuation(algebraic_cubic,(-2,2),2)
+    z = natural(algebraic_cubic,(-2,2),2)
     plt.plot(z[1],z[0])
     plt.xlabel('Parameter')
     plt.ylabel('Solution')
     
     # solve using pseudo-arclength continuation
-    zz = psuedo_arclength_continuation(algebraic_cubic,(-2,2),2)
+    zz = psuedo_arclength(algebraic_cubic,(-2,2),2)
     #print(zz[0])
     plt.figure()
     plt.plot(zz[1],zz[0])

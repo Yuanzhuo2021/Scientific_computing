@@ -4,143 +4,99 @@ Created on Thu Apr 13 21:59:11 2023
 
 @author: YHU
 """
-import numpy as np
-import matplotlib.pyplot as plt
-import scipy.sparse.linalg as sla
-
-# convert ode BVP into a system of algebraic equations
-a = 0 
-b = 10
-gamma1 = 1
-gamma2 = 2
-N =1000
-u_a = gamma1
-u_b = gamma2
-dx = (b-a)/N
-
-
-# second order differentiation: (u[i+1] -2u[i] + u[i-1])/(dx)^2 +q[i]= 0 .Because the source equation is 0, q[i] = 0.
-
-# use numpy to solve the system of equations. There are N-1 equations as there are N-1 unknowns.
-# build A-DD
-A = np.zeros((N-1,N-1))
-
-# the first row and the last row are quite different.We deal with them seperately
-A[0,0]=-2
-A[0,1]=1
-A[N-2,N-2]=-2
-A[N-2,N-3]=1
-
-# for the rest of the row, coefficient for u[i+1] is 1, u[i] is -2,u[i-1] is 1
-for i in range(N-3):
-    A[i+1,i]=1
-    A[i+1,i+1]=-2
-    A[i+1,i+2]=1
-
-#right side of the equations:b-DD
-B = np.zeros(N-1)
-#put initail and end conditions
-B[0]=u_a
-B[N-2]=u_b
-
-
-# account for q term
-q = 1   # set q[i]= 1
-Q = np.zeros(N-1)
-for i in range(N-1):
-    Q[i] = q
-
-
-# parameter D in front of second derivative
-D = 2
-
-
-
-u = np.linalg.solve(A, -B-(((dx)**2)*Q)/D)
-
-print(u)
-#%%
-
 
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.sparse as ss
 
-# convert ode BVP into a system of algebraic equations
-a = 0 
-b = 10
-gamma1 = 1
-gamma2 = 2
-N =1000
-u_a = gamma1
-u_b = gamma2
-dx = (b-a)/N
+def finite_difference(a,b,alpha,beta,D,q):
+    """
+    This function is a BVP solver that is capable of finding 
+    numerical solutions to ODEs using finite difference method.
+
+    Parameters
+    ----------
+    a : int/float
+        Left boundary
+    b : int/float
+        Right boundary
+    alpha : int/float
+        Value at Left boundary 
+    beta : int/float
+        Value at Left boundary 
+    D: int/float
+        Parameter in the ODE
+    q : callable
+        User defined function of q(x)
+        e.g. q = lambda x: 2*x+1 or 
+            q = lambda x : x*0 + p (if q(x) = p for all x)
+
+    Returns
+    -------
+    u : numpy array
+        The solutions of ODE in the domain
+
+    """
+    
+    # convert ode BVP into a system of algebraic equations
+
+    N = 100000
+    dx = (b-a)/N
+    x = np.linspace(a,b,N-1)
+    # second order differentiation: D*(u[i+1] -2u[i] + u[i-1])/(dx)^2 +q[i]= 0 
+
+    # Build matrix vector form to represent the system of equations. There are N-1 equations as there are N-1 unknowns.
+    # build A-DD
+    A = ss.lil_matrix((N-1, N-1))
+
+    # the first row and the last row are quite different.We deal with them seperately
+    A[0,0]=-2
+    A[0,1]=1
+    A[N-2,N-2]=-2
+    A[N-2,N-3]=1
+
+    # for the rest of the row, coefficient for u[i+1] is 1, u[i] is -2,u[i-1] is 1
+    for i in range(N-3):
+       A[i+1,i]=1
+       A[i+1,i+1]=-2
+       A[i+1,i+2]=1
+
+    #right side of the equations:b-DD
+    B = np.zeros(N-1)
+    #put initail and end conditions
+    B[0]=u_a
+    B[N-2]=u_b
 
 
-# second order differentiation: (u[i+1] -2u[i] + u[i-1])/(dx)^2 +q[i]= 0 .Because the source equation is 0, q[i] = 0.
+    # account for q term
+    Q  = q(x)
 
-# use numpy to solve the system of equations. There are N-1 equations as there are N-1 unknowns.
-# build A-DD
-A = ss.lil_matrix((N-1, N-1))
+    # use sparse matrix to solve the matrix-vector form of equation
+    u = ss.linalg.spsolve(A, -B-(((dx)**2)*Q)/D)
 
-# the first row and the last row are quite different.We deal with them seperately
-A[0,0]=-2
-A[0,1]=1
-A[N-2,N-2]=-2
-A[N-2,N-3]=1
-
-# for the rest of the row, coefficient for u[i+1] is 1, u[i] is -2,u[i-1] is 1
-for i in range(N-3):
-    A[i+1,i]=1
-    A[i+1,i+1]=-2
-    A[i+1,i+2]=1
-
-#right side of the equations:b-DD
-B = np.zeros(N-1)
-#put initail and end conditions
-B[0]=u_a
-B[N-2]=u_b
-
-
-# account for q term
-q = 1   # set q[i]= 1
-Q = np.zeros(N-1)
-for i in range(N-1):
-    Q[i] = q
-
-
-# parameter D in front of second derivative
-D = 2
-
-u = ss.linalg.spsolve(A, -B-(((dx)**2)*Q)/D)
+    return [u,x]
 # %%
 
-# explicit solution
+if __name__ == '__main__':
 
-def real_soln(x):
-    soln = ((gamma2 - gamma1)/(b-a))*(x-a)+gamma1
-    return soln
+    a = 0 
+    b = 10
+    alpha = 1
+    beta = 2
+    N =100000
+    D =2
+    q = lambda x: x*0 +1 # q[x] =1
+    
+    z = finite_difference(a,b,alpha,beta,D,q)
+    
+    # test the accuray, use finite difference, it equals real solution with an error tolerance 1e-3
+    def real_soln2(x):
+        soln = (-1/(2*D))*(x-a)*(x-b)+((gamma2-gamma1)/(b-a))*(x-a)+gamma1
+        return soln
+    print(np.allclose(z[0],real_soln2(z[1]),1e-3))
 
-x = np.linspace(a,b,N-1)
-# test the accuray, use finite difference, it equals real solution with an error tolerance 1e-3
-print(np.allclose(u,real_soln(x),1e-3))
+    plt.plot(z[1],real_soln2(z[1]),z[1],z[0])
+    plt.xlabel('x')
+    plt.ylabel('u')
+    plt.legend(['real solution','Finite difference'])
 
-plt.plot(x,real_soln(x),x,u)
-plt.xlabel('x')
-plt.ylabel('u')
-plt.legend(['real solution','Finite difference'])
-
-#%%
-
-def real_soln2(x):
-    soln = (-1/(2*D))*(x-a)*(x-b)+((gamma2-gamma1)/(b-a))*(x-a)+gamma1
-    return soln
-
-x = np.linspace(a,b,N-1)
-# test the accuray, use finite difference, it equals real solution with an error tolerance 1e-3
-print(np.allclose(u,real_soln2(x),1e-3))
-
-plt.plot(x,real_soln2(x),x,u)
-plt.xlabel('x')
-plt.ylabel('u')
-plt.legend(['real solution','Finite difference'])
