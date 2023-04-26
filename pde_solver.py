@@ -10,10 +10,11 @@ import matplotlib.pyplot as plt
 import math
 import scipy.sparse as ss 
 import matplotlib.animation as animation
+import cProfile
 
 
 #%matplotlib notebook
-def explicit_euler(a,b,alpha,beta,D,t,method):
+def explicit_euler(a,b,alpha,beta,f,D,t,method):
     """
     This function uses explicit euler to solve PDE
 
@@ -27,6 +28,8 @@ def explicit_euler(a,b,alpha,beta,D,t,method):
         Left boundary condition e.g. u(a,0) = alpha 
     beta : int/float
         Right boundary condition e.g. u(b,0) = beta
+    fx : callable
+        Initial condition(a function that you need to define)
     D : float/int
         Parameter of the diffusion term 
     t : int/float
@@ -56,7 +59,8 @@ def explicit_euler(a,b,alpha,beta,D,t,method):
     #fx = np.sin((math.pi*(x-a)/(b-a)))
     
     x = np.linspace(a,b,N_space+1)
-    fx = np.sin(math.pi*(x-a)/(b-a))
+    #fx = np.sin(math.pi*(x-a)/(b-a))
+    fx = f(x)
     
     u = np.zeros((int(N_time)+1,N_space+1))
     
@@ -94,7 +98,7 @@ def explicit_euler(a,b,alpha,beta,D,t,method):
 
 
 
-def implicit_euler(a,b,alpha,beta,D,t):
+def implicit_euler(a,b,alpha,beta,f,D,t):
     """
     This function uses implicit euler method to solve pde
 
@@ -157,10 +161,11 @@ def implicit_euler(a,b,alpha,beta,D,t):
     b_DD[N_space-2]=beta
 
 
-    # implement the equation
-    u0 = np.zeros(N_space-1)
+    # add initial condition
+    u0 = f(x)[1:-1]
     U = [u0]
     
+    # implement the equation
     for n in range(N_time):
         u1 = ss.linalg.spsolve(I-C*A,u0+C*b_DD)
         U.append(u1)
@@ -173,7 +178,7 @@ def implicit_euler(a,b,alpha,beta,D,t):
     return [x,U]
 
 
-def crank_nicolson(a,b,alpha,beta,D,t):
+def crank_nicolson(a,b,alpha,beta,f,D,t):
     """
     This function uses Crank Nicolson method to solve PDE
 
@@ -236,11 +241,11 @@ def crank_nicolson(a,b,alpha,beta,D,t):
     b_DD[0]=alpha
     b_DD[N_space-2]=beta
 
-
-    # implement the equation
-    u0 = (np.zeros(N_space-1))
+    # initial condition
+    u0 = f(x)[1:-1]
     U = [u0]
     
+    # implement the equation
     for n in range(N_time):
         u1 = np.linalg.solve(I-(C/2)*A,np.dot((I+(C/2)*A),u0)+C*b_DD)
         U.append(u1)
@@ -267,8 +272,9 @@ if __name__ == '__main__':
     D = 0.5
     t = 1
     
+    f = lambda x: np.sin(math.pi*(x-a)/(b-a))
     #solve linear diffusion equation
-    z = explicit_euler(0,1,0,0,0.5,1,'euler')    
+    z = explicit_euler(0,1,0,0,f,0.5,1,'euler')    
     print(z[1])
 
    
@@ -310,12 +316,22 @@ if __name__ == '__main__':
     
 #%%    
     # solve a PDE using implicit euler method
-    z = implicit_euler(0,1,1,0,0.5,1)
+    f = lambda x: 0*x + 0
+    
+    # use cprofiling to record the run time
+    pr = cProfile.Profile()
+    pr.enable()    
+    
+    z = implicit_euler(0,1,1,0,f,0.5,1)
+    
+    pr.disable()
+    pr.print_stats(sort='cumtime')  # run time : 0.686 seconds
+    
 
     plt.plot(z[0],z[1][0])
     plt.plot(z[0],z[1][200])
     plt.plot(z[0],z[1][400])
-    plt.plot(z[0],z[1][999])
+    plt.plot(z[0],z[1][-1])
     plt.xlabel('x')
     plt.ylabel('u(x,t)')
     plt.legend(['t=0','t=0.2','t=0.4','t=1'])
@@ -323,13 +339,21 @@ if __name__ == '__main__':
 
 #%%
     # solve a PDE using crank nicolson method
-    z = crank_nicolson(0,1,1,0,0.5,1)
-
+    f = lambda x: 0*x + 0
+    
+    pr = cProfile.Profile()
+    pr.enable()   
+    
+    z = crank_nicolson(0,1,1,0,f,0.5,1)
+    
+    pr.disable()
+    pr.print_stats(sort='cumtime')  # run time : 0.330 seconds
+   
     plt.figure()
     plt.plot(z[0],z[1][0])
     plt.plot(z[0],z[1][200])
     plt.plot(z[0],z[1][400])
-    plt.plot(z[0],z[1][999])
+    plt.plot(z[0],z[1][-1])
     plt.xlabel('x')
     plt.ylabel('u(x,t)')
     plt.legend(['t=0','t=0.2','t=0.4','t=1'])

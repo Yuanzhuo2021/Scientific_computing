@@ -142,7 +142,6 @@ if __name__ == '__main__':
     plt.xlabel('Parameter')
     plt.ylabel('Solution')
 
-#%%
 
 
 
