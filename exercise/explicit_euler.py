@@ -111,9 +111,6 @@ if __name__ == '__main__':
     plt.ylabel('u(x,t)')
 
 
-
-#%%
-
     # ref : blackboard week20demo
     fig,ax = plt.subplots()
     ax.set_xlabel('x')
@@ -128,9 +125,7 @@ if __name__ == '__main__':
     ani = animation.FuncAnimation(fig,animate,frames = int(z[2]),blit =True,interval = 10)
     plt.show()
 
-#%%
     # test the result
-    
     x = z[0]
     # real solution
     f = np.exp(-D*((math.pi)**2)*(1)/((b-a)**2))*np.sin(math.pi*(x-a)/(b-a))    
