@@ -44,7 +44,7 @@ def shooting_func(func,s):
     Returns
     ----------
     list
-    Returns [x(0)-x(T), y(0)-]
+    equations that need to find roots
 
 
      """

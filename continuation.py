@@ -143,7 +143,35 @@ if __name__ == '__main__':
     plt.ylabel('Solution')
 
 
+#%% 
+    # natural parameter continuation on a PDE
 
+    S =1000
+    deltat = 0.01
+    u1 = []
+    u2 = []
+    u0 = (1,1)
+    beta = 0
+
+    def Hopf_bifurcation(u,beta):
+        u1,u2 = u
+        du1dt = beta*u1-u2 - u1*(u1**2+u2**2)
+        du2dt = u1+beta*u2 - u2*(u1**2+u2**2)
+        return np.array([du1dt,du2dt])
+
+    def euler_step(u0,beta,deltat):
+        u1 = u0+deltat*Hopf_bifurcation(u0,beta)
+        beta = beta + 2/S
+        return u1,beta
+
+    for i in range(S):
+        u0,t0 = euler_step(u0,beta,deltat)
+        u1.append(u0[0])
+        u2.append(u0[1])
+
+    t = np.linspace(0,1,S)
+    beta = np.linspace(0,2,S)
+    plt.plot(beta,u1,beta,u2)
 
 
 

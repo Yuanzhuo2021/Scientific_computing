@@ -215,7 +215,7 @@ def crank_nicolson(a,b,alpha,beta,f,D,t):
     C = D*dt/(dx**2)
 
     # identity matrix
-    I = np.identity(N_space-1)
+    I = ss.identity(N_space-1).toarray()
     
     #stepwise x values
     x = np.linspace(a,b,N_space+1)
@@ -223,7 +223,7 @@ def crank_nicolson(a,b,alpha,beta,f,D,t):
     # use numpy to solve the system of equations. There are N-1 equations as there are N-1 unknowns.
 
     # build A-DD
-    A = np.zeros((N_space-1,N_space-1))
+    A = ss.lil_matrix((N_space-1,N_space-1)).toarray()
     # the first row and the last row are quite different.We deal with them seperately
     A[0,0]=-2
     A[0,1]=1
@@ -247,7 +247,7 @@ def crank_nicolson(a,b,alpha,beta,f,D,t):
     
     # implement the equation
     for n in range(N_time):
-        u1 = np.linalg.solve(I-(C/2)*A,np.dot((I+(C/2)*A),u0)+C*b_DD)
+        u1 = ss.linalg.spsolve(I-(C/2)*A,np.dot((I+(C/2)*A),u0)+C*b_DD)
         U.append(u1)
         u0 = u1 
         
