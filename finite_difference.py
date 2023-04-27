@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.sparse as ss
 
-def finite_difference(a,b,alpha,beta,D,q):
+def fd(a,b,alpha,beta,D,q):
     """
     This function is a BVP solver that is capable of finding 
     numerical solutions to ODEs using finite difference method.
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     D =2
     q = lambda x: x*0 +1 # q[x] =1
     
-    z = finite_difference(a,b,alpha,beta,D,q)
+    z = fd(a,b,alpha,beta,D,q)
     
     # test the accuray, use finite difference, it equals real solution with an error tolerance 1e-3
     def real_soln2(x):
